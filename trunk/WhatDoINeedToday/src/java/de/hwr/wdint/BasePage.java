@@ -85,6 +85,8 @@ public class BasePage extends WebPage {
         weatherPanel = new WeatherPanel("weatherPanel");
         weatherPanel.setOutputMarkupId(true);
 
+
+
         add(locationPanel);
         add(rssPanel);
         add(weatherPanel);

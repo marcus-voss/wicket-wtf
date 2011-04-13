@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigator;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
@@ -33,6 +35,13 @@ import org.apache.wicket.model.PropertyModel;
  * @author juliusollesch
  */
 public final class RSSPanel extends Panel {
+
+    final WebMarkupContainer panelPlaceholder = new WebMarkupContainer("panelPlaceholder"){
+      {
+            //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
+            setOutputMarkupId(true);
+        }
+    };
 
     //Variable für das Datenmodell des Labels des Pannels
     private String labelTitleText = "Willst Du heute Abend weggehen?";
@@ -110,6 +119,8 @@ public final class RSSPanel extends Panel {
         //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
         this.setOutputMarkupId(true);
 
+
+
         try {
 
 
@@ -119,7 +130,7 @@ public final class RSSPanel extends Panel {
              * Events aus dem Prinz RSS Feed der Region des Nutzers in der
              * DataView anzeigen
              */
-            add(new AjaxFallbackLink("link1") {
+            panelPlaceholder.add(new IndicatingAjaxFallbackLink("link1") {
                 //OnClick wird überschrieben um die Logik zu implementieren
 
                 @Override
@@ -137,7 +148,11 @@ public final class RSSPanel extends Panel {
                         //DataView mit den Events füllen und aktualisieren
                         updateDataViewWithEvents(target);
 
-                    }
+                        panelPlaceholder.add(new SimpleAttributeModifier("class", "rssPanelParty"));
+
+                        target.addComponent(panelPlaceholder);
+
+                    }   
                 }
             });
 
@@ -145,7 +160,7 @@ public final class RSSPanel extends Panel {
             /*
              * Füge einen zweiten AjaxLink hinzu um das Fernsehprgramm zu laden
              */
-            add(new AjaxFallbackLink("link2") {
+            panelPlaceholder.add(new IndicatingAjaxFallbackLink("link2") {
                 //OnClick wird überschrieben um die Logik zu implementieren
 
                 @Override
@@ -169,16 +184,24 @@ public final class RSSPanel extends Panel {
                             Logger.getLogger(RSSPanel.class.getName()).log(Level.SEVERE, null, ex);
                         }
 
+                        panelPlaceholder.add(new SimpleAttributeModifier("class", "rssPanelTV"));
+
+                        target.addComponent(panelPlaceholder);
+
                     }
                 }
             });
 
             //Schließlich: Kompenenten hinzufügen
-            add(title);
+            panelPlaceholder.add(title);
             dataContainer.add(dataView);
             dataContainer.add(pager);
-            add(dataContainer);
+            panelPlaceholder.add(dataContainer);
 
+            add(panelPlaceholder);
+            
+            
+            
 
         } catch (Exception ex) {
             Logger.getLogger(HeaderPanel.class.getName()).log(Level.SEVERE, null, ex);
