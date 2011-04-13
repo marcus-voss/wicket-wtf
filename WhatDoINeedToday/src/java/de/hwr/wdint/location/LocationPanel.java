@@ -9,6 +9,7 @@ import de.hwr.wdint.HomePage;
 import java.util.Locale;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxEditableLabel;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxIndicatorAppender;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
@@ -28,6 +29,8 @@ public final class LocationPanel extends Panel {
     public void setLabelText(String labelText) {
         this.labelTitleText = labelText;
     }
+
+   
 
     //Label des Pannels ist ein AjaxEditableLabel, so dass Benutzer ihren Aufenthaltsort überschreiben können
     AjaxEditableLabel title = new AjaxEditableLabel("title", new PropertyModel(this, "labelTitleText")) {
@@ -68,6 +71,7 @@ public final class LocationPanel extends Panel {
             setOutputMarkupId(true);
 
             setEscapeModelStrings(true);
+            
         }
     };
 
