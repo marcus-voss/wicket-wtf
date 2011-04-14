@@ -21,7 +21,9 @@ public final class WeatherPanel extends Panel
 {
     private Location userLocation;
     private Advice advice;
-    
+
+    //Enthält die Wetterkonditionen
+    private String conditions;
 
     /**
      * Main
@@ -44,11 +46,27 @@ public final class WeatherPanel extends Panel
         {
             //Freift auf die userLocation in der BasePage zu
             userLocation = ((BasePage)this.getPage()).getUserLocation();
-            //Erstellt die Instanz von Advice für den Ratschlag für den User und fügt diesem dem Label "advice" zu
-            advice = new Advice(userLocation);
-            
+                        
+            //Erstellt eine Instanz von WeatherInfo und holt die aktuellen Wetterkonditionen
+            WeatherInfo weatherInfo = new WeatherInfo(userLocation);
+
+            //advice
+            advice = new Advice(weatherInfo.getConditions());
             labelAdviceText = advice.getAdvice();
             add(labelAdvice);
+
+            //conditions
+            labelConditionText = weatherInfo.getConditions();
+            add(labelCondition);
+
+            //High
+            labelHighText = weatherInfo.getHigh();
+            add(labelHigh);
+
+            //Low
+            labelLowText = weatherInfo.getLow();
+            add(labelLow);
+
             //add(new Label("advice", advice.getAdvice()));
             
             labelTitleText = "Wettervorhersage für " + userLocation.getCity();
@@ -85,6 +103,9 @@ public final class WeatherPanel extends Panel
     
     //Variable für das Datenmodell des Labels des Pannels
     private String labelAdviceText = "";
+    private String labelLowText = "";
+    private String labelHighText = "";
+    private String labelConditionText = "";
 
     public String getLabelAdviceText() {
         return labelAdviceText;
@@ -94,7 +115,35 @@ public final class WeatherPanel extends Panel
         this.labelAdviceText = labelText;
     }
 
-    Label labelAdvice = new Label("advice", new PropertyModel(this,"labelAdviceText")){
+    Label labelAdvice = new Label("advice", new PropertyModel(this,"labelAdviceText"))
+    {
+        {
+            //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
+            setOutputMarkupId(true);
+        }
+
+    };
+
+    Label labelHigh = new Label("low", new PropertyModel(this, "labelLowText"))
+    {
+        {
+            //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
+            setOutputMarkupId(true);
+        }
+
+    };
+
+    Label labelLow = new Label("high", new PropertyModel(this,"labelHighText"))
+    {
+        {
+            //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
+            setOutputMarkupId(true);
+        }
+
+    };
+
+    Label labelCondition = new Label("condition", new PropertyModel(this,"labelConditionText"))
+    {
         {
             //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
             setOutputMarkupId(true);
