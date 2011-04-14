@@ -1,6 +1,5 @@
 package de.hwr.wdint.weather;
 
-import de.hwr.wdint.location.Location;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -11,25 +10,18 @@ import java.util.HashMap;
  */
 public class Advice implements Serializable
 {
-//Enthält den Ratschlag
-private String advice;
-
-//Enthält die Wetterkonditionen
-private String conditions;
-
 //Konstante, die für die Wetterkonditionen einen Ratschlag zurückgibt
 private final static HashMap<String, String> ADVICE_TABLE = adviceTable();
+
+//Enthält den Ratschlag
+private String advice;
 
     /**
      * Konstruktor
      * @param location muss übergeben werden
      */
-    public Advice(Location location)
+    public Advice(String conditions)
     {
-        //Erstellt eine Instanz von WeatherInfo und holt die aktuellen Wetterkonditionen
-        WeatherInfo weatherInfo = new WeatherInfo(location);
-        conditions = weatherInfo.getConditions();
-
         //Holt mithilfe der Konstante ADVIC_TABLE den Ratschlag für die aktuellen Wetterkonditionen
         if (ADVICE_TABLE.get(conditions) != null)
         {
