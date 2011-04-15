@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>FacebookPanel</title>
+    </head>
+    <body>
+
+		<!-- all elements that need to be rendered go in here -->
+        <wicket:panel>
+
+			<!-- need to add this root panel for the namespace fb: to work properly -->
+			<div id ="fb-root"></div>
+
+			<!-- fb javascript sdk -->
+			<script type="text/javascript"  src="http://connect.facebook.net/en_US/all.js"></script>
+			
+			<!-- the super cool blue fb login button -->
+			<div wicket:id="fbLoginButton" id="fbLoginButton">
+				<fb:login-button autologoutlink="true"></fb:login-button>
+			</div>
+
+			<!-- fb init and stuff -->
+			<script type="text/javascript">
+
+				//sets the access token in the java backend
+				function login(response) {
+
+					//make a GET request to this id (i.e. the 'behavior' object in the .java file)
+					//and pass the access token
+					wicketAjaxGet("?wicket:interface=:0:facebookPanel::IActivePageBehaviorListener:0:&wicket:ignoreIfNotActive=true&fb_access_token=" + response.session.access_token, null, null);
+
+				}
+
+				//do cleanup etc
+				function logout(response) {
+
+					wicketAjaxGet("?wicket:interface=:0:facebookPanel::IActivePageBehaviorListener:0:&wicket:ignoreIfNotActive=true&fb_access_token=null", null, null);
+
+				}
+
+				//init facebook
+				FB.init({	appId:'113587772056243', //id of the facebook what do i need today app
+							cookie:true,
+							status:true,
+							xfbml:true
+				});
+
+				//if the user logs in we need to set the access token
+				FB.Event.subscribe('auth.login', function(response) {
+					login(response);
+				});
+
+				//unhide when the user logs out
+				FB.Event.subscribe('auth.logout', function(response) {
+					logout(response);
+				});
+
+				//if the user is already logged in we need to set the access token
+				FB.getLoginStatus(function(response) {
+					if (response.session) {
+						login(response);
+					}
+				});
+
+			</script>
+
+			<!-- this is where all the information goes -->
+			<!-- this will be a collection containing rows of single divs-->
+			<div wicket:id="fbInformation" id="fbInformation">
+				<div wicket:id="welcomeLabel" id="welcomeLabel" />
+			</div>
+			
+        </wicket:panel>
+		
+    </body>
+</html>
