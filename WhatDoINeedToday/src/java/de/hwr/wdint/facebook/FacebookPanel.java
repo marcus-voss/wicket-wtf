@@ -67,10 +67,7 @@ public final class FacebookPanel extends Panel {
 		labelWelcome = new Label("welcomeLabel", new PropertyModel(this, "labelWelcomeText"));
 		labelWelcome.setOutputMarkupId(true);
 		fbInformation.add(labelWelcome);
-/*
-		System.getProperties().put("http.proxyHost", "194.94.23.231");
-		System.getProperties().put("http.proxyPort", "80");
-*/
+		
     }
 
 	@Override
