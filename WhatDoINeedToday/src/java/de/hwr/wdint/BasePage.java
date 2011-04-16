@@ -5,6 +5,7 @@
  */
 package de.hwr.wdint;
 
+import de.hwr.wdint.facebook.FacebookPanel;
 import de.hwr.wdint.location.Location;
 import de.hwr.wdint.location.LocationPanel;
 import de.hwr.wdint.rss.RSSPanel;
@@ -63,6 +64,7 @@ public class BasePage extends WebPage {
     private LocationPanel locationPanel;
     private RSSPanel rssPanel;
     private WeatherPanel weatherPanel;
+    private FacebookPanel facebookPanel;
 
     /**
      * Constructor
@@ -83,6 +85,7 @@ public class BasePage extends WebPage {
         locationPanel = new LocationPanel("locationPanel");
         rssPanel = new RSSPanel("rssPanel");
         weatherPanel = new WeatherPanel("weatherPanel");
+        facebookPanel = new FacebookPanel("facebookPanel");
         weatherPanel.setOutputMarkupId(true);
 
 
@@ -90,6 +93,7 @@ public class BasePage extends WebPage {
         add(locationPanel);
         add(rssPanel);
         add(weatherPanel);
+        add(facebookPanel);
         add(new StyleSheetReference("stylesheet", BasePage.class, "style.css"));
 
 
