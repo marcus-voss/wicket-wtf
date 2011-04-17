@@ -10,6 +10,8 @@
 		<!-- all elements that need to be rendered go in here -->
         <wicket:panel>
 
+			<div class="panelTitle"><span wicket:id="labelTitle" >title here</span></div>
+
 			<!-- need to add this root panel for the namespace fb: to work properly -->
 			<div id ="fb-root">
 
@@ -18,7 +20,17 @@
 			
 			<!-- the super cool blue fb login button -->
 			<div wicket:id="fbLoginButton" id="fbLoginButton">
-				<fb:login-button autologoutlink="true"></fb:login-button>
+
+				<!-- turn the login button into a logout button after login -->
+				<!-- and request permissions -->
+				<!-- see https://developers.facebook.com/docs/authentication/permissions/ -->
+				<fb:login-button
+					autologoutlink="true"
+					perms="user_events,user_birthday,friends_events,friends_birthday"></fb:login-button>
+				<!-- button text would go in the above tag -->
+				<!-- but this text does not update when autologoutlink is true -->
+				<!-- newlines and multiline comments in this tag seem to mess up the button -->
+				
 			</div>
 
 			<!-- fb init and stuff -->
@@ -36,6 +48,7 @@
 				//do cleanup etc
 				function logout(response) {
 
+					//pass null instead of token
 					wicketAjaxGet("?wicket:interface=:0:facebookPanel::IActivePageBehaviorListener:0:&wicket:ignoreIfNotActive=true&fb_access_token=null", null, null);
 
 				}
@@ -69,9 +82,12 @@
 			</div>
 
 			<!-- this is where all the information goes -->
-			<!-- this will be a collection containing rows of single divs-->
 			<div wicket:id="fbInformation" id="fbInformation">
-				<div wicket:id="welcomeLabel" id="welcomeLabel" />
+				<table class="dataView">
+					<tr wicket:id="fbEntry">
+						<td><span wicket:id="fbEntryContent" /></td>
+					</tr>
+				</table>
 			</div>
 			
         </wicket:panel>
