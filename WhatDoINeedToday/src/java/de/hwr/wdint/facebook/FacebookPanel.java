@@ -10,13 +10,17 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.types.Event;
+import com.restfb.types.NamedFacebookType;
 import com.restfb.types.User;
 import com.restfb.types.Venue;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -87,12 +91,12 @@ public final class FacebookPanel extends Panel {
 			@Override
 			protected void populateItem(Item item) {
 
-				item.add(new Label("fbEntryContent", (String) item.getModelObject()));
+				//allow arbitrary html ... I know
+				item.add(new Label("fbEntryContent", (String) item.getModelObject()).setEscapeModelStrings(false));
 
 			}
 			
 		};
-
 		fbInformation.add(fbDataView);
 		
     }
@@ -116,11 +120,19 @@ public final class FacebookPanel extends Panel {
 				//set / reset UI depending on the value
 				if(!access_token.equals("null")) {
 
-					setupFBInformation(access_token, target);
+					if(target != null) {
+
+						setupFBInformation(access_token, target);
+
+					}
 
 				} else {
 
-					resetFBInformation(target);
+					if(target != null) {
+
+						resetFBInformation(target);
+
+					}
 
 				}
 
@@ -139,20 +151,28 @@ public final class FacebookPanel extends Panel {
 	 */
 	private void setupFBInformation(String access_token, AjaxRequestTarget target) {
 
+		//clear old content
+		fbDataList.clear();
+		fbDataView.removeAll();
+
 		//create the client
 		FacebookClient fbClient = new DefaultFacebookClient(access_token);
 
 		//get basic user info
 		User user = fbClient.fetchObject("me", User.class);
-		fbDataList.add("Hallo " + user.getFirstName() + "!");
+		fbDataList.add("Hallo <a href='https://www.facebook.com/me/' target='_blank'>" + user.getFirstName() + "</a>!");
 
 		//process all birthdays
-		Connection<User> friends = fbClient.fetchConnection("me/friends", User.class, Parameter.with("fields", "birthday"));
+		Connection<User> friends = fbClient.fetchConnection("me/friends", User.class, Parameter.with("fields", "id, name, birthday, location"));
 		processBirthdays(friends);
+
+		//get number of friends in current city
+		int friendCount = processFriends(friends, user.getLocation().getId());
 		while(friends.hasNext()) {
 
 			friends = fbClient.fetchConnectionPage(friends.getNextPageUrl(), User.class);
 			processBirthdays(friends);
+			friendCount += processFriends(friends, user.getLocation().getId());
 
 		}
 
@@ -165,6 +185,9 @@ public final class FacebookPanel extends Panel {
 			processEvents(events);
 
 		}
+
+		//display friend count
+		fbDataList.add(friendCount + " Freunde in " + user.getLocation().getName());
 
 		target.addComponent(fbInformation);
 
@@ -179,10 +202,29 @@ public final class FacebookPanel extends Panel {
 		List<User> friendList = friends.getData();
 		for(User friend : friendList) {
 
-			Date birthday = friend.getBirthdayAsDate();
-			if(birthday != null && isToday(birthday)) {
+			//friend.getBirthdayAsDate() does not seem to work very well ...
+			String bdString = friend.getBirthday();
 
-				fbDataList.add(friend.getFirstName() + " hat heute Geburtstag - besorge ein Geschenk!");
+			//some friends choose to not display their birthday at all
+			if(bdString != null) {
+
+				try {
+
+					Date birthday = new SimpleDateFormat("MM/dd").parse(bdString);
+					if(isToday(birthday, false)) {
+
+						//display the name as link
+						fbDataList.add(	"<a href='https://www.facebook.com/profile.php?id=" + friend.getId() + "'" +
+										" target='_blank'>" + friend.getName() + "</a>" +
+										" hat heute Geburtstag - besorge ein Geschenk!");
+
+					}
+
+				} catch (ParseException ex) {
+
+					System.out.println("Error parsing date '" + bdString + "' (" + ex.getMessage() + ")");
+
+				}
 
 			}
 
@@ -201,10 +243,13 @@ public final class FacebookPanel extends Panel {
 
 			//list includes past and future events
 			Date eventDate = event.getStartTime();
-			if(isToday(event.getStartTime())) {
+			if(isToday(event.getStartTime(), true)) {
 
+				//build link to event
+				String eventLine =	"<a href='https://www.facebook.com/event.php?eid=" + event.getId() + "'" +
+									" target='_blank'>" + event.getName() + "</a>";
+				
 				//check location
-				String eventLine = event.getName();
 				String eventLocation = event.getLocation();
 				if(eventLocation == null) {
 
@@ -242,6 +287,31 @@ public final class FacebookPanel extends Panel {
 	}
 
 	/**
+	 * returns number of friends in the location
+	 * @param friends
+	 * @param locationId
+	 * @return
+	 */
+	private int processFriends(Connection<User> friends, String locationId) {
+
+		int friendCount = 0;
+		List<User> friendList = friends.getData();
+		for(User friend : friendList) {
+
+			NamedFacebookType location = friend.getLocation();
+			if(location != null && location.getId().equals(locationId)) {
+
+				++friendCount;
+
+			}
+
+		}
+
+		return friendCount;
+
+	}
+
+	/**
 	 * resets all content
 	 * @param target
 	 */
@@ -253,12 +323,13 @@ public final class FacebookPanel extends Panel {
 	}
 
 	/**
-	 * obviously i was lazy ...
+	 * obviously I was lazy ...
 	 * http://www.computing.net/answers/programming/comparing-a-date-object-with-today/17209.html
 	 * @param date
+	 * @param compareYear
 	 * @return
 	 */
-	private static boolean isToday(Date date) {
+	private static boolean isToday(Date date, boolean compareYear) {
 
 		Calendar today = Calendar.getInstance();
 		today.setTime(new Date());
@@ -266,7 +337,8 @@ public final class FacebookPanel extends Panel {
 		Calendar otherday = Calendar.getInstance();
 		otherday.setTime(date);
 
-		return	otherday.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+		//e.g. in birthdays we do not want to compare the year
+		return	(compareYear ? (otherday.get(Calendar.YEAR) == today.get(Calendar.YEAR)) : true) &&
 				otherday.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
 				otherday.get(Calendar.DAY_OF_MONTH) == today.get(Calendar.DAY_OF_MONTH);
 
