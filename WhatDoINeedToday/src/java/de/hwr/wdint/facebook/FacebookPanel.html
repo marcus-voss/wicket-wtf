@@ -43,10 +43,10 @@
 					function init() {
 
 						//init facebook
-						FB.init({	appId:'113587772056243', //id of the facebook what do i need today app
-									cookie:true,
-									status:true,
-									xfbml:true
+						FB.init({	appId:	'113587772056243',	//id of the facebook what do i need today app
+									cookie:	true,				//we just have the app so it can provide the id
+									status:	true,				//the app will never leave development mode/state
+									xfbml:	true
 						});
 
 						//if the user logs in we need to set the access token
@@ -71,7 +71,7 @@
 				</script>
 
 				<!-- the super cool blue fb login button -->
-				<div wicket:id="fbLoginButton" id="fbLoginButton">
+				<div wicket:id="fbLoginButton">
 
 					<!-- turn the login button into a logout button after login -->
 					<!-- and request permissions -->
@@ -88,6 +88,10 @@
 			</div>
 
 			<!-- this is where all the information goes -->
+			<!-- static id="" helps updating this component -->
+			<!-- use the static id to update the component -->
+			<!-- this id must be a regular html id and NOT A WICKET:ID -->
+			<!-- setOutputMarkupId for this component must not be set to true! -->
 			<div wicket:id="fbInformation" id="fbInformation">
 				<table class="dataView">
 					<tr wicket:id="fbEntry">

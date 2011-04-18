@@ -79,7 +79,12 @@ public final class FacebookPanel extends Panel {
 
 		//the fb information container
 		fbInformation = new WebMarkupContainer("fbInformation");
-		fbInformation.setOutputMarkupId(true);
+
+		//do not add this line - the container has a static id
+		//use the static id to update the component
+		//this id must be a regular html id and NOT A WICKET:ID
+		//setOutputMarkupId for this component must not be set to true!
+		//fbInformation.setOutputMarkupId(true);
 		add(fbInformation);
 
 		//the actual information
@@ -151,16 +156,15 @@ public final class FacebookPanel extends Panel {
 	 */
 	private void setupFBInformation(String access_token, AjaxRequestTarget target) {
 
-		//clear old content
 		fbDataList.clear();
-		fbDataView.removeAll();
 
 		//create the client
 		FacebookClient fbClient = new DefaultFacebookClient(access_token);
 
 		//get basic user info
 		User user = fbClient.fetchObject("me", User.class);
-		fbDataList.add("Hallo <a href='https://www.facebook.com/me/' target='_blank'>" + user.getFirstName() + "</a>!");
+		fbDataList.add(	"Hallo <a href='https://www.facebook.com/profile.php?id=" + user.getId() +
+						"' target='_blank'>" + user.getFirstName() + "</a>!");
 
 		//process all birthdays
 		Connection<User> friends = fbClient.fetchConnection("me/friends", User.class, Parameter.with("fields", "id, name, birthday, location"));
@@ -189,7 +193,10 @@ public final class FacebookPanel extends Panel {
 		//display friend count
 		fbDataList.add(friendCount + " Freunde in " + user.getLocation().getName());
 
-		target.addComponent(fbInformation);
+		//use the static id to update the component
+		//this id must be a regular html id and NOT A WICKET:ID
+		//setOutputMarkupId for this component must not be set to true!
+		target.addComponent(fbInformation, "fbInformation");
 
 	}
 
@@ -210,6 +217,7 @@ public final class FacebookPanel extends Panel {
 
 				try {
 
+					//only month and day are important
 					Date birthday = new SimpleDateFormat("MM/dd").parse(bdString);
 					if(isToday(birthday, false)) {
 
