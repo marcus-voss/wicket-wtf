@@ -6,10 +6,10 @@
         <title>FacebookPanel</title>
 	</head>
 
-	<!-- all elements that need to be rendered go in here -->
-	<wicket:panel>
-		
-		<body onLoad="init()">
+	<body>
+
+		<!-- all elements that need to be rendered go in here -->
+		<wicket:panel>
 
 			<div class="panelTitle"><span wicket:id="labelTitle" /></div>
 
@@ -39,34 +39,29 @@
 
 					}
 
-					//init function
-					function init() {
+					//init facebook
+					FB.init({	appId:	'113587772056243',	//id of the facebook what do i need today app
+								cookie:	true,				//we just have the app so it can provide the id
+								status:	true,				//the app will never leave development mode/state
+								xfbml:	true
+					});
 
-						//init facebook
-						FB.init({	appId:	'113587772056243',	//id of the facebook what do i need today app
-									cookie:	true,				//we just have the app so it can provide the id
-									status:	true,				//the app will never leave development mode/state
-									xfbml:	true
-						});
+					//if the user logs in we need to set the access token
+					FB.Event.subscribe('auth.login', function(response) {
+						login(response);
+					});
 
-						//if the user logs in we need to set the access token
-						FB.Event.subscribe('auth.login', function(response) {
+					//if the user logs out we need to do cleanup stuff
+					FB.Event.subscribe('auth.logout', function(response) {
+						logout(response);
+					});
+
+					//if the user is already logged in we need to set the access token
+					FB.getLoginStatus(function(response) {
+						if (response.session) {
 							login(response);
-						});
-
-						//if the user logs out we need to do cleanup stuff
-						FB.Event.subscribe('auth.logout', function(response) {
-							logout(response);
-						});
-
-						//if the user is already logged in we need to set the access token
-						FB.getLoginStatus(function(response) {
-							if (response.session) {
-								login(response);
-							}
-						});
-
-					}
+						}
+					});
 
 				</script>
 
@@ -100,8 +95,8 @@
 				</table>
 			</div>
 			
-		</body>
+		</wicket:panel>
+			
+	</body>
 
-	</wicket:panel>
-	
 </html>
