@@ -10,6 +10,8 @@ import de.hwr.wdint.location.Location;
 import de.hwr.wdint.location.LocationPanel;
 import de.hwr.wdint.rss.RSSPanel;
 import de.hwr.wdint.weather.WeatherPanel;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebPage;
@@ -79,10 +81,22 @@ public class BasePage extends WebPage {
 
 
         //HWR-Proxy Settings :-(
-        System.getProperties().put("http.proxyHost", "194.94.23.231");
-        System.getProperties().put("http.proxyPort", "80");
+        //System.getProperties().put("http.proxyHost", "194.94.23.231");
+        //System.getProperties().put("http.proxyPort", "80");
         //HWR-Proxy  Settings Ende
     }
+
+	/**
+	 * gets the proxy settings for HWR
+	 * @return
+	 */
+	public Proxy getProxy() {
+
+		Proxy proxy = null;
+		proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
+		return proxy;
+
+	}
 
 
     public void update(AjaxRequestTarget target){
