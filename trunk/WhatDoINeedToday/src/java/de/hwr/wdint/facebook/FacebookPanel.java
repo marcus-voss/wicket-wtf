@@ -190,24 +190,37 @@ public final class FacebookPanel extends Panel {
 
 		//process all birthdays
 		Connection<User> friends = fbClient.fetchConnection("me/friends", User.class, Parameter.with("fields", "id, name, birthday, location"));
-		processBirthdays(friends);
-
+		
+		int bdCount = processBirthdays(friends);
 		int friendCountFBLocation = processFriends(friends, user.getLocation().getId());
 		while(friends.hasNext()) {
 
 			friends = fbClient.fetchConnectionPage(friends.getNextPageUrl(), User.class);
-			processBirthdays(friends);
+			bdCount += processBirthdays(friends);
 			friendCountFBLocation += processFriends(friends, user.getLocation().getId());
+
+		}
+
+		if(bdCount == 0) {
+
+			//no birthdays
+			fbDataList.add("Entwarnung - heute keine Geburtstage!");
 
 		}
 
 		//process all events
 		Connection<Event> events = fbClient.fetchConnection("me/events", Event.class);
-		processEvents(events);
+		int eventCount = processEvents(events);
 		while(events.hasNext()) {
 
 			events = fbClient.fetchConnectionPage(events.getNextPageUrl(), Event.class);
-			processEvents(events);
+			eventCount += processEvents(events);
+
+		}
+
+		if(eventCount == 0) {
+
+			fbDataList.add("Heute leider keine Events :-(");
 
 		}
 
@@ -225,8 +238,9 @@ public final class FacebookPanel extends Panel {
 	/**
 	 * adds birthdays to the list
 	 * @param friends
+	 * @return
 	 */
-	private void processBirthdays(Connection<User> friends) {
+	private int processBirthdays(Connection<User> friends) {
 
 		int bdCount = 0;
 		List<User> friendList = friends.getData();
@@ -263,21 +277,18 @@ public final class FacebookPanel extends Panel {
 
 		}
 
-		if(bdCount == 0) {
-
-			//no birthdays
-			fbDataList.add("Entwarnung - heute keine Geburtstage!");
-
-		}
+		return bdCount;
 
 	}
 
 	/**
 	 * adds events to the list
 	 * @param events
+	 * @return
 	 */
-	private void processEvents(Connection<Event> events) {
+	private int processEvents(Connection<Event> events) {
 
+		int eventCount = 0;
 		List<Event> eventList = events.getData();
 		for(Event event : eventList) {
 
@@ -318,11 +329,14 @@ public final class FacebookPanel extends Panel {
 				//we only need the time because it is today
 				eventLine += " um " + new SimpleDateFormat("HH:mm").format(eventDate) + " Uhr";
 
+				++eventCount;
 				fbDataList.add(eventLine);
 
 			}
 
 		}
+
+		return eventCount;
 
 	}
 
@@ -358,7 +372,7 @@ public final class FacebookPanel extends Panel {
 	private void resetFBInformation(AjaxRequestTarget target) {
 
 		fbDataList.clear();
-		target.addComponent(fbInformation);
+		target.addComponent(fbInformation, "fbInformation");
 
 	}
 
