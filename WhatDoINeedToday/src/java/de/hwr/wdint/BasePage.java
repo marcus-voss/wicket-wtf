@@ -30,25 +30,6 @@ public class BasePage extends WebPage {
 
     public void setUserLocation(String userInput) {
         this.userLocation = new Location(userInput);
-
-//        String markupID = weatherPanel.getMarkupId();
-//        this.remove(weatherPanel);
-//        weatherPanel = new WeatherPanel("weatcherPanel");
-//        weatherPanel.setMarkupId(markupID);
-//        weatherPanel.setOutputMarkupId(true);
-//        this.add(weatherPanel);
-//
-//
-//        markupID = rssPanel.getMarkupId();
-//        this.remove(rssPanel);
-//        rssPanel = new RSSPanel("rssPanel");
-//        rssPanel.setMarkupId(markupID);
-//        rssPanel.setOutputMarkupId(true);
-//        this.add(rssPanel);
-
-        //WeatherPanel temp = new WeatherPanel("weatherPanel");
-        //weatherPanel.replaceWith(temp);
-        //weatherPanel = temp;
         
     }
 
