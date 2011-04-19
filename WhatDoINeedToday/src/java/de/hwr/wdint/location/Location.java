@@ -5,6 +5,7 @@
 package de.hwr.wdint.location;
 
 import java.io.Serializable;
+import java.net.Proxy;
 import java.net.URL;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +25,7 @@ public class Location implements Serializable {
     /*
      *city ist die Stadt des Benutzers
      */
+    
 
     String city;
     /*
@@ -134,6 +136,7 @@ public class Location implements Serializable {
         WebRequest wr = (WebRequest) RequestCycle.get().getRequest();
         //IP Adresse des Benutzers feststellen
         String originatingIPAddress = wr.getHttpServletRequest().getRemoteHost();
+        
         //Methode aufrufen zur Geolokalisierung des Benutzers mittels IP
         getLocationInfoByIP(originatingIPAddress);
 
@@ -232,17 +235,27 @@ public class Location implements Serializable {
      */
 
     private void getLocationInfoByIP(String theIP) {
-        System.out.println("IP Adress = " + theIP);
+        System.out.println("Originating IP Address = " + theIP);
+        //Falls localhost zugreift, muss die IP Adresse auf einen leeren String gestezt werden, da der WebService andernfalls spinnt
+        if(theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")){
+            theIP = "";
+            System.out.println("Changed IP to null String");
+        }
+
+
         try {
 
             // URL zu GeoLocation API erstellen
             URL url = new URL("http://www.geoplugin.net/xml.gp?ip=" + theIP);
 
+            System.out.println("Erzeugte URL: " + url.toString());
 
             // Document Builder initialisieren und mit Inhalt des XML von GeoPlugin füttern
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
+
+            System.out.println("URL Stream: " + url.openConnection(Proxy.NO_PROXY));
 
             Document doc = db.parse(url.openStream());
 
