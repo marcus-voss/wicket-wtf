@@ -142,16 +142,16 @@ col#second {
 }
 
 .extraInfoTable {
-	background-color: #e3e3e3;
+	background-color: #f9f9f9;
 	display: none;
 	position: absolute;
 	z-index: 5;
 	padding: 5px;
 	left: 20px;
-	border-left: 2px solid #292929;
-	border-top: 2px solid #292929;
-	border-right: 2px solid #393939;
-	border-bottom: 2px solid #393939;
+	border-left: 2px solid #d1d1d1;
+	border-top: 2px solid #d1d1d1;
+	border-right: 2px solid #e1e1e1;
+	border-bottom: 2px solid #e1e1e1;
 	-webkit-box-shadow:0 5px 10px #888;
 	-moz-box-shadow:0 5px 10px #888;
 	-ms-box-shadow:0 5px 10px #888;
