@@ -30,6 +30,13 @@ public class WeatherInfo
     private String low;
     private String conditions;
     private String icon;
+    private String sunset;
+    private String sunrise;
+
+    private String sunsetMinute;
+    private String sunsetHour;
+    private String sunriseMinute;
+    private String sunriseHour;
 
     /**
      * Konstruktor
@@ -90,12 +97,40 @@ public class WeatherInfo
         NodeList conditionsNodesChild = conditionsNodes.item(0).getChildNodes();
         conditions = conditionsNodesChild.item(0).getNodeValue().trim();
 
-        //Icons Helen URL extrahieren
+        //Icons Contemporary URL extrahieren
         NodeList iconNodes = todaysForecastdayElement.getElementsByTagName("icon_set");
-        Element iconHelenElement = (Element)iconNodes.item(8);
-        NodeList iconHelenNodes = iconHelenElement.getElementsByTagName("icon_url");
-        NodeList iconHelenNodesChild = iconHelenNodes.item(0).getChildNodes();
-        icon = iconHelenNodesChild.item(0).getNodeValue().trim();
+        Element iconContemporaryElement = (Element)iconNodes.item(7);
+        NodeList iconContemporaryNodes = iconContemporaryElement.getElementsByTagName("icon_url");
+        NodeList iconContemporaryNodesChild = iconContemporaryNodes.item(0).getChildNodes();
+        icon = iconContemporaryNodesChild.item(0).getNodeValue().trim();
+
+        //Sunset
+        NodeList sunsetNodes = doc.getElementsByTagName("sunset");
+        Element sunsetElement = (Element)sunsetNodes.item(0);
+
+        NodeList sunsetHourNodes = sunsetElement.getElementsByTagName("hour");
+        NodeList sunsetHourNodesChild = sunsetHourNodes.item(0).getChildNodes();
+        sunsetHour = sunsetHourNodesChild.item(0).getNodeValue().trim();
+
+        NodeList sunsetMinuteNodes = sunsetElement.getElementsByTagName("minute");
+        NodeList sunsetMinuteNodesChild = sunsetMinuteNodes.item(0).getChildNodes();
+        sunsetMinute = sunsetMinuteNodesChild.item(0).getNodeValue().trim();
+
+        sunset = sunsetHour + ":" + sunsetMinute;
+
+        //Sunrise
+        NodeList sunriseNodes = doc.getElementsByTagName("sunrise");
+        Element sunriseElement = (Element)sunriseNodes.item(0);
+
+        NodeList sunriseHourNodes = sunriseElement.getElementsByTagName("hour");
+        NodeList sunriseHourNodesChild = sunriseHourNodes.item(0).getChildNodes();
+        sunriseHour = sunriseHourNodesChild.item(0).getNodeValue().trim();
+
+        NodeList sunriseMinuteNodes = sunriseElement.getElementsByTagName("minute");
+        NodeList sunriseMinuteNodesChild = sunriseMinuteNodes.item(0).getChildNodes();
+        sunriseMinute = sunriseMinuteNodesChild.item(0).getNodeValue().trim();
+
+        sunrise = sunriseHour + ":" + sunriseMinute;
 
         }
         catch (SAXException ex)
@@ -147,4 +182,22 @@ public class WeatherInfo
     {
         return low;
     }
+
+    /**
+     * Getter für sunrise
+     * @return
+     */
+    public String getSunrise() {
+        return sunrise;
+    }
+
+    /**
+     * Getter für sunset
+     * @return
+     */
+    public String getSunset() {
+        return sunset;
+    }
+
+
 }

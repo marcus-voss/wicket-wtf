@@ -6,11 +6,19 @@
 package de.hwr.wdint.weather;
 import de.hwr.wdint.*;
 import de.hwr.wdint.location.Location;
+import java.net.URL;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.html.basic.Label;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.wicket.Resource;
+import org.apache.wicket.ResourceReference;
+import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.resource.ContextRelativeResource;
+import org.apache.wicket.util.resource.IResourceStream;
 
 /**
  * WeatherPanel
@@ -24,6 +32,9 @@ public final class WeatherPanel extends Panel
 
     //Enthält die Wetterkonditionen
     private String conditions;
+    private String iconUrl;
+
+    
 
     /**
      * Main
@@ -36,6 +47,7 @@ public final class WeatherPanel extends Panel
         setOutputMarkupId(true);
 
         add(title);
+        add(new StaticImage("icon", new PropertyModel(this, "iconUrl")));
 
     }
 
@@ -73,6 +85,11 @@ public final class WeatherPanel extends Panel
             
             add(title);
 
+           iconUrl = weatherInfo.getIcon();
+            //iconUrl = "http://icons-ecast.wxug.com/i/c/h/partlycloudy.gif?" + Math.random();
+           // add(imageIcon);
+            //add(new StaticImage("icon", new Model(iconUrl)));
+
         }
         catch (Exception ex)
         {
@@ -106,7 +123,7 @@ public final class WeatherPanel extends Panel
     private String labelLowText = "";
     private String labelHighText = "";
     private String labelConditionText = "";
-
+    
     public String getLabelAdviceText() {
         return labelAdviceText;
     }
@@ -150,6 +167,9 @@ public final class WeatherPanel extends Panel
         }
 
     };
+
+   
+
 
 
 }
