@@ -19,7 +19,6 @@ import com.restfb.types.Venue;
 import de.hwr.wdint.BasePage;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.text.ParseException;
@@ -193,13 +192,12 @@ public final class FacebookPanel extends Panel {
 		Connection<User> friends = fbClient.fetchConnection("me/friends", User.class, Parameter.with("fields", "id, name, birthday, location"));
 		processBirthdays(friends);
 
-		//get number of friends in current city
-		int friendCount = processFriends(friends, user.getLocation().getId());
+		int friendCountFBLocation = processFriends(friends, user.getLocation().getId());
 		while(friends.hasNext()) {
 
 			friends = fbClient.fetchConnectionPage(friends.getNextPageUrl(), User.class);
 			processBirthdays(friends);
-			friendCount += processFriends(friends, user.getLocation().getId());
+			friendCountFBLocation += processFriends(friends, user.getLocation().getId());
 
 		}
 
@@ -214,7 +212,8 @@ public final class FacebookPanel extends Panel {
 		}
 
 		//display friend count
-		fbDataList.add(friendCount + " Freunde in " + user.getLocation().getName());
+		fbDataList.add(friendCountFBLocation + " Freunde in " + user.getLocation().getName());
+		
 
 		//use the static id to update the component
 		//this id must be a regular html id and NOT A WICKET:ID
