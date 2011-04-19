@@ -239,7 +239,7 @@ public class Location implements Serializable {
     private void getLocationInfoByIP(String theIP) {
         System.out.println("Originating IP Address = " + theIP);
         //Falls localhost zugreift, muss die IP Adresse auf einen leeren String gestezt werden, da der WebService andernfalls spinnt
-        if(theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")){
+        if(theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1") || theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")){
             theIP = "";
             System.out.println("Changed IP to null String");
         }
