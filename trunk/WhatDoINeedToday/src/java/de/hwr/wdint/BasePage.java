@@ -98,8 +98,8 @@ public class BasePage extends WebPage {
 
 
         //HWR-Proxy Settings :-(
-        //System.getProperties().put("http.proxyHost", "194.94.23.231");
-        //System.getProperties().put("http.proxyPort", "80");
+        System.getProperties().put("http.proxyHost", "194.94.23.231");
+        System.getProperties().put("http.proxyPort", "80");
         //HWR-Proxy  Settings Ende
     }
 
