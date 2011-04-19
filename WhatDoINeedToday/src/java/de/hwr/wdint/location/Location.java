@@ -123,6 +123,7 @@ public class Location implements Serializable {
      *
      */
     public Location(String userInput) {
+        userInput = userInput.replace(" ", "%20");
         getLocationInfoByUserInput(userInput);
 
     }
