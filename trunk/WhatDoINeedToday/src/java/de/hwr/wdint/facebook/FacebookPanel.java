@@ -191,17 +191,19 @@ public final class FacebookPanel extends Panel {
 		//process all birthdays
 		Connection<User> friends = fbClient.fetchConnection("me/friends", User.class, Parameter.with("fields", "id, name, birthday, location"));
 		
-		int bdCount = processBirthdays(friends);
-		int friendCountFBLocation = processFriends(friends, user.getLocation().getId());
+		int birthdayCount = processBirthdays(friends);
+		int friendCount = processFriends(friends, user.getLocation().getId());
 		while(friends.hasNext()) {
 
+			//get next page of friends if neccessary
 			friends = fbClient.fetchConnectionPage(friends.getNextPageUrl(), User.class);
-			bdCount += processBirthdays(friends);
-			friendCountFBLocation += processFriends(friends, user.getLocation().getId());
+
+			birthdayCount += processBirthdays(friends);
+			friendCount += processFriends(friends, user.getLocation().getId());
 
 		}
 
-		if(bdCount == 0) {
+		if(birthdayCount == 0) {
 
 			//no birthdays
 			fbDataList.add("Entwarnung - heute keine Geburtstage!");
@@ -220,12 +222,21 @@ public final class FacebookPanel extends Panel {
 
 		if(eventCount == 0) {
 
-			fbDataList.add("Heute leider keine Events :-(");
+			//no events
+			fbDataList.add("Heute leider keine Events");
 
 		}
 
 		//display friend count
-		fbDataList.add(friendCountFBLocation + " Freunde in " + user.getLocation().getName());
+		fbDataList.add(	friendCount + " Freund" + (friendCount != 0 ? "e" : "" ) +
+						" in " + user.getLocation().getName());
+
+		if(birthdayCount == 0 && friendCount == 0 && eventCount == 0) {
+
+			//really NOTHING going on
+			fbDataList.add("Man heute ist echt nichts los ...");
+
+		}
 		
 
 		//use the static id to update the component
