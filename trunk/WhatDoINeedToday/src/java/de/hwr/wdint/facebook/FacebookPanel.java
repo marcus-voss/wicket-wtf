@@ -228,6 +228,7 @@ public final class FacebookPanel extends Panel {
 	 */
 	private void processBirthdays(Connection<User> friends) {
 
+		int bdCount = 0;
 		List<User> friendList = friends.getData();
 		for(User friend : friendList) {
 
@@ -243,6 +244,8 @@ public final class FacebookPanel extends Panel {
 					Date birthday = new SimpleDateFormat("MM/dd").parse(bdString);
 					if(isToday(birthday, false)) {
 
+						++bdCount;
+
 						//display the name as link
 						fbDataList.add(	"<a href='https://www.facebook.com/profile.php?id=" + friend.getId() + "'" +
 										" target='_blank'>" + friend.getName() + "</a>" +
@@ -257,6 +260,13 @@ public final class FacebookPanel extends Panel {
 				}
 
 			}
+
+		}
+
+		if(bdCount == 0) {
+
+			//no birthdays
+			fbDataList.add("Entwarnung - heute keine Geburtstage!");
 
 		}
 
