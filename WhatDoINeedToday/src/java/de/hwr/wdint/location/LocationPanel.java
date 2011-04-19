@@ -85,7 +85,13 @@ public final class LocationPanel extends Panel {
     public void setLabelUserUrbanArea(String labelUserUrbanArea) {
         this.labelUserUrbanAreaText = labelUserUrbanArea;
     }
-    Label userUrbanArea = new Label("userUrbanArea", new PropertyModel(this, "labelUserUrbanAreaText"));
+    Label userUrbanArea = new Label("userUrbanArea", new PropertyModel(this, "labelUserUrbanAreaText")){
+        {
+            //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
+            setOutputMarkupId(true);
+
+        }
+    };
 
     public LocationPanel(String id) {
         super(id);

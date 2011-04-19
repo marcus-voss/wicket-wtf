@@ -80,10 +80,10 @@ public class BasePage extends WebPage {
         add(new StyleSheetReference("stylesheet", BasePage.class, "style.css"));
 
 
-        //HWR-Proxy Settings :-(
-        //System.getProperties().put("http.proxyHost", "194.94.23.231");
-        //System.getProperties().put("http.proxyPort", "80");
-        //HWR-Proxy  Settings Ende
+        //Set <<system-wide>> Proxy Settings :-(
+        System.getProperties().put("http.proxyHost", ((InetSocketAddress)this.getProxy().address()).getHostName());
+        System.getProperties().put("http.proxyPort", ((InetSocketAddress)this.getProxy().address()).getPort());
+        //Proxy Settings Ende
     }
 
 	/**
@@ -93,6 +93,7 @@ public class BasePage extends WebPage {
 	public Proxy getProxy() {
 
 		Proxy proxy = null;
+                //HWR Proxy - beim Deployen nächste Zeile auskommentieren
 		proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
 		return proxy;
 
