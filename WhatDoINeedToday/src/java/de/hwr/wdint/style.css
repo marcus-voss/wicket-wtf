@@ -57,6 +57,10 @@ a {
     text-decoration: underline;
 }
 
+a.small {
+	font-size: 0.8em;
+}
+
 img {
     border: none;
 }
@@ -137,6 +141,30 @@ col#second {
 
 }
 
+.extraInfoTable {
+	background-color: #333333;
+	display: none;
+	position: absolute;
+	z-index: 5;
+	padding: 5px;
+	left: 20px;
+	border-left: 2px solid #292929;
+	border-top: 2px solid #292929;
+	border-right: 2px solid #393939;
+	border-bottom: 2px solid #393939;
+	-webkit-box-shadow:0 5px 10px #222;
+	-moz-box-shadow:0 5px 10px #222;
+	-ms-box-shadow:0 5px 10px #222;
+}
+
+#showInfo:hover .extraInfoTable {
+	display: block;
+}
+
+#showInfo + p {
+    font-size: 0.8em;
+}
+
 .generalPanel {
     display: table-cell;
     border-left: 3px solid #292929;
@@ -191,12 +219,13 @@ col#second {
 .panelTitle{
 
     position: relative;
-    top: -20px;
-    left: 5px;
+    top: -25px;
+    /*left: 5px;*/
+    margin: 5px;
     font-family: 'Lucida Sans', Helvetica, Sans-serif, sans;
     font-size: 14pt;
     font-style: oblique;
-    text-shadow: 0px 2px 6px #ddd;
+    text-shadow: 0px 2px 6px #aaa;
 }
 
 
@@ -205,6 +234,7 @@ col#second {
             padding-left: auto;*/
     margin-right: auto;
     margin-left: auto;
+    margin-bottom: 15px;
     text-align: center;
     display: table !important;
     max-width: 95%;
