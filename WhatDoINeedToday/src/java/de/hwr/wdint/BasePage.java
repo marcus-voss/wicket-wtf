@@ -111,6 +111,7 @@ public class BasePage extends WebPage {
            
            rssPanel.setLabelText("Update");
            target.addComponent(rssPanel);
+
         }
     }
 }
