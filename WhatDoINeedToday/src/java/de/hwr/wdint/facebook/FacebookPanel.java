@@ -16,6 +16,7 @@ import com.restfb.types.Event;
 import com.restfb.types.NamedFacebookType;
 import com.restfb.types.User;
 import com.restfb.types.Venue;
+import de.hwr.wdint.BasePage;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -27,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -167,27 +166,23 @@ public final class FacebookPanel extends Panel {
 		//clear list for new presentation
 		fbDataList.clear();
 
-		//use this for HWR proxy
+		//proxy settings
 		WebRequestor webRequestor = new DefaultWebRequestor() {
 
 			@Override
 			protected HttpURLConnection openConnection(URL url) throws IOException {
 
-				Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
-				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection(proxy);
-				return urlConnection;
+				Proxy proxy = ((BasePage) getPage()).getProxy();
+				return proxy != null ?
+					(HttpURLConnection) url.openConnection(proxy) :
+					(HttpURLConnection) url.openConnection() ;
 
 			}
 
 		};
 
-		//create the client ...
-
-		//... with HWR proxy settings
+		//create the client
 		FacebookClient fbClient = new DefaultFacebookClient(access_token, webRequestor, new DefaultJsonMapper());
-
-		//... without proxy
-		//FacebookClient fbClient = new DefaultFacebookClient(access_token);
 
 		//get basic user info
 		User user = fbClient.fetchObject("me", User.class);
