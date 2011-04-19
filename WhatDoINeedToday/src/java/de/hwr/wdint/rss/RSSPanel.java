@@ -6,7 +6,6 @@ import com.sun.cnpi.rss.parser.RssParser;
 import com.sun.cnpi.rss.parser.RssParserException;
 import com.sun.cnpi.rss.parser.RssParserFactory;
 import de.hwr.wdint.HeaderPanel;
-import de.hwr.wdint.Application;
 import de.hwr.wdint.BasePage;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,7 +16,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigator;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxFallbackLink;
@@ -36,14 +34,15 @@ import org.apache.wicket.model.PropertyModel;
  */
 public final class RSSPanel extends Panel {
 
-    final WebMarkupContainer panelPlaceholder = new WebMarkupContainer("panelPlaceholder"){
-      {
+    //WebMarkupContainer um CSS Style auf Panelinhalt anzuwenden
+    final WebMarkupContainer panelPlaceholder = new WebMarkupContainer("panelPlaceholder") {
+
+        {
             //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
             setOutputMarkupId(true);
         }
     };
-
-    //Variable für das Datenmodell des Labels des Pannels
+    //Variable für das Datenmodell des TitleLabels des Panels
     private String labelTitleText = "Willst Du heute Abend weggehen?";
 
     public String getLabelText() {
@@ -53,17 +52,18 @@ public final class RSSPanel extends Panel {
     public void setLabelText(String labelText) {
         this.labelTitleText = labelText;
     }
-    Label title = new Label("labelTitle", new PropertyModel(this, "labelTitleText")) {
+    Label labelTitle = new Label("labelTitle", new PropertyModel(this, "labelTitleText")) {
 
         {
             //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
             setOutputMarkupId(true);
         }
     };
+
     /*
      * Data Container umschliesst die Tabelle/Dataview, dies ist nötig,
      * damit die Tabelle via ajax aktualisiert werden kann. DataView an sich
-     * ist nicht ajax-fähig...
+     * ist nicht AJAX-fähig...
      */
     final WebMarkupContainer dataContainer = new WebMarkupContainer("dataContainer") {
 
@@ -82,7 +82,7 @@ public final class RSSPanel extends Panel {
      * DataView zur Füllung der Tabelle mit Einträgen, es werden maximal fünf
      * Einträge gleichzeitig angezeigt.
      */
-    DataView dataView = new DataView("simple", new ListDataProvider(list), 5) {
+    DataView dataView = new DataView("table", new ListDataProvider(list), 5) {
         /*
          * Hier wird festgelegt, wie die Tabelle zu füllen ist
          * id und description finden sich in der HTML wieder
@@ -107,7 +107,74 @@ public final class RSSPanel extends Panel {
 
         @Override
         protected void onAjaxEvent(AjaxRequestTarget target) {
+            //aktualisiere DataView indem der umschließende DataContainer aktualisiert wird
             target.addComponent(dataContainer);
+        }
+    };
+    /*
+     * Füge einen neuen AjaxLink hinzu - Weggehen! soll die aktuellen
+     * Events aus dem Prinz RSS Feed der Region des Nutzers in der
+     * DataView anzeigen
+     */
+    IndicatingAjaxFallbackLink linkEvents = new IndicatingAjaxFallbackLink("link1") {
+        //OnClick wird überschrieben um die Logik zu implementieren
+
+        @Override
+        public void onClick(AjaxRequestTarget target) {
+
+            // Ereignis behandeln
+            // target ist null:    Regulärer Request, Seite wird neu geladen
+            // target ist gesetzt: Ajax-Request, Komponenten können aktualisiert werden
+            if (target != null) {
+                // Titel Label aktualisieren
+                labelTitleText = "Events in der Region " + ((BasePage) this.getPage()).getUserLocation().getUrbanArea();
+
+                target.addComponent(labelTitle);
+                //DataView mit den Events füllen und aktualisieren
+                updateDataViewWithEvents(target);
+
+                //CSS Attribut Class auf Party ändern
+                panelPlaceholder.add(new SimpleAttributeModifier("class", "rssPanelParty"));
+
+                target.addComponent(panelPlaceholder);
+
+            }
+        }
+    };
+
+    /*
+     * Füge einen zweiten AjaxLink hinzu um das Fernsehprgramm zu laden
+     */
+    IndicatingAjaxFallbackLink linkHome = new IndicatingAjaxFallbackLink("link2") {
+        //OnClick wird überschrieben um die Logik zu implementieren
+
+        @Override
+        public void onClick(AjaxRequestTarget target) {
+            // Ereignis behandeln
+            //labelTitle.setDefaultModelObject("clicked");
+            // target ist null:    Regulärer Request, Seite wird neu geladen
+            // target ist gesetzt: Ajax-Request, Komponenten können aktualisiert werden
+            if (target != null) {
+                
+                // Titel Label aktualisieren
+                labelTitleText = "Fernsehprogramm für heute Abend";
+                target.addComponent(labelTitle);
+                try {
+                    //Data View aktualisieren, zunächst muss list geleert werden, damit AJAX funktioniet
+                    list.clear();
+                    list.addAll(readRSS(makeTVURL())); //aktualisert list mit den Einträgen des Fernsehprogramms
+                    System.out.println("Liste mit: " + list.size());
+                    //dataView neu rendern
+                    target.addComponent(dataContainer);
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(RSSPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                panelPlaceholder.add(new SimpleAttributeModifier("class", "rssPanelTV"));
+
+                target.addComponent(panelPlaceholder);
+
+            }
         }
     };
 
@@ -116,92 +183,24 @@ public final class RSSPanel extends Panel {
      */
     public RSSPanel(String id) {
         super(id);
-        //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
+        //Wichtig damit AJAX funktioniert! So wird die ID des Elements in die HTML übergeben
         this.setOutputMarkupId(true);
-
-
 
         try {
 
 
-
-            /*
-             * Füge einen neuen AjaxLink hinzu - Weggehen! soll die aktuellen
-             * Events aus dem Prinz RSS Feed der Region des Nutzers in der
-             * DataView anzeigen
-             */
-            panelPlaceholder.add(new IndicatingAjaxFallbackLink("link1") {
-                //OnClick wird überschrieben um die Logik zu implementieren
-
-                @Override
-                public void onClick(AjaxRequestTarget target) {
-
-                    // Ereignis behandeln
-                    //title.setDefaultModelObject("clicked");
-                    // target ist null:    Regulärer Request, Seite wird neu geladen
-                    // target ist gesetzt: Ajax-Request, Komponenten können aktualisiert werden
-                    if (target != null) {
-                        // Titel Label aktualisieren
-                        labelTitleText = "Events in der Region " + ((BasePage) this.getPage()).getUserLocation().getUrbanArea();
-
-                        target.addComponent(title);
-                        //DataView mit den Events füllen und aktualisieren
-                        updateDataViewWithEvents(target);
-
-                        panelPlaceholder.add(new SimpleAttributeModifier("class", "rssPanelParty"));
-
-                        target.addComponent(panelPlaceholder);
-
-                    }   
-                }
-            });
-
-            
-            /*
-             * Füge einen zweiten AjaxLink hinzu um das Fernsehprgramm zu laden
-             */
-            panelPlaceholder.add(new IndicatingAjaxFallbackLink("link2") {
-                //OnClick wird überschrieben um die Logik zu implementieren
-
-                @Override
-                public void onClick(AjaxRequestTarget target) {
-                    // Ereignis behandeln
-                    //title.setDefaultModelObject("clicked");
-                    // target ist null:    Regulärer Request, Seite wird neu geladen
-                    // target ist gesetzt: Ajax-Request, Komponenten können aktualisiert werden
-                    if (target != null) {
-                        // Titel Label aktualisieren
-                        labelTitleText = "Fernsehprogramm für heute Abend";
-                        target.addComponent(title);
-                        try {
-                            //Data View aktualisieren
-                            list.clear();
-                            list.addAll(readRSS(makeTVURL())); //aktualisert list mit den Einträgen des Fernsehprogramms
-                            System.out.println("Liste mit: " + list.size());
-                            //dataView neu rendern
-                            target.addComponent(dataContainer);
-                        } catch (MalformedURLException ex) {
-                            Logger.getLogger(RSSPanel.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                        panelPlaceholder.add(new SimpleAttributeModifier("class", "rssPanelTV"));
-
-                        target.addComponent(panelPlaceholder);
-
-                    }
-                }
-            });
-
             //Schließlich: Kompenenten hinzufügen
-            panelPlaceholder.add(title);
+            panelPlaceholder.add(labelTitle);
+
+            panelPlaceholder.add(linkEvents);
+            panelPlaceholder.add(linkHome);
+
+            //dataView und Navigator zu DataContainer hinzufügen
             dataContainer.add(dataView);
             dataContainer.add(pager);
             panelPlaceholder.add(dataContainer);
 
             add(panelPlaceholder);
-            
-            
-            
 
         } catch (Exception ex) {
             Logger.getLogger(HeaderPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -209,13 +208,7 @@ public final class RSSPanel extends Panel {
         }
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        labelTitleText = "Willst Du heute Abend weggehen?";
-        
-    }
-
+    
 
     /*
      * Aktualisierung des DataView mit Events
@@ -223,7 +216,7 @@ public final class RSSPanel extends Panel {
     private void updateDataViewWithEvents(AjaxRequestTarget target) {
 
         try {
-            //list muss komplett geleert und neubefüllt werden, damit ajax funktioniert
+            //list muss komplett geleert und neubefüllt werden, damit AJAX funktioniert
             list.clear();
             list.addAll(readRSS(makePrinzKonzertURL())); //aktualisert list
             list.addAll(readRSS(makePrinzPartyURL())); //aktualisert list
@@ -239,11 +232,7 @@ public final class RSSPanel extends Panel {
      */
 
     private URL makePrinzKonzertURL() throws MalformedURLException {
-        String area = ((BasePage) this.getPage()).getUserLocation().getUrbanArea();
-        area = area.replaceAll("ä", "ae");
-        area = area.replaceAll("ü", "ue");
-        area = area.replaceAll("ö", "oe");
-        area = area.replaceAll("ß", "ss");
+        String area = escapeGermanCharacters(((BasePage) this.getPage()).getUserLocation().getUrbanArea());
         area = area.toLowerCase();
 
         System.out.println("Area: " + area);
@@ -255,11 +244,7 @@ public final class RSSPanel extends Panel {
      */
 
     private URL makePrinzPartyURL() throws MalformedURLException {
-        String area = ((BasePage) this.getPage()).getUserLocation().getUrbanArea();
-        area = area.replaceAll("ä", "ae");
-        area = area.replaceAll("ü", "ue");
-        area = area.replaceAll("ö", "oe");
-        area = area.replaceAll("ß", "ss");
+        String area = escapeGermanCharacters(((BasePage) this.getPage()).getUserLocation().getUrbanArea());
         area = area.toLowerCase();
 
         System.out.println("Area: " + area);
@@ -271,16 +256,21 @@ public final class RSSPanel extends Panel {
      */
 
     private URL makePrinzKulturURL() throws MalformedURLException {
-        String area = ((BasePage) this.getPage()).getUserLocation().getUrbanArea();
-        area = area.replaceAll("ä", "ae");
-        area = area.replaceAll("ü", "ue");
-        area = area.replaceAll("ö", "oe");
-        area = area.replaceAll("ß", "ss");
+        String area = escapeGermanCharacters(((BasePage) this.getPage()).getUserLocation().getUrbanArea());
+
         area = area.toLowerCase();
 
         System.out.println("Area: " + area);
         return new URL("http://" + area + ".prinz.de/rss/kultur");
 
+    }
+
+    private String escapeGermanCharacters(String dirtyString) {
+        dirtyString = dirtyString.replaceAll("ä", "ae");
+        dirtyString = dirtyString.replaceAll("ü", "ue");
+        dirtyString = dirtyString.replaceAll("ö", "oe");
+        dirtyString = dirtyString.replaceAll("ß", "ss");
+        return dirtyString;
     }
     /*
      * Erstellt die URL zum TVProgramm24 Feed
@@ -323,7 +313,7 @@ public final class RSSPanel extends Panel {
                     Item item = (Item) i.next();
                     String itemTitle = item.getTitle().toString();
                     System.out.println("Original: " + item.getDescription().toString());
-                    String itemDescription = item.getDescription().toString().replaceAll("(\r\n|\r|\n|\n\r)", "");//.replaceAll("<b[^<]+?>", "");
+                    String itemDescription = item.getDescription().toString().replaceAll("(\r\n|\r|\n|\n\r)", "");
                     System.out.println("RegExed: " + itemDescription);
                     String itemLink = item.getLink().toString();
                     //Erzeuge neues RRSEntry Objekt und packe es in die Liste

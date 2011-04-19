@@ -6,10 +6,14 @@ package de.hwr.wdint.location;
 
 import de.hwr.wdint.BasePage;
 import de.hwr.wdint.HomePage;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxEditableLabel;
+import org.apache.wicket.extensions.ajax.markup.html.autocomplete.AutoCompleteBehavior;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 /**
@@ -30,8 +34,19 @@ public final class LocationPanel extends Panel {
     }
     //Label des Pannels ist ein AjaxEditableLabel, so dass Benutzer ihren Aufenthaltsort überschreiben können
     AjaxEditableLabel userInputCity = new AjaxEditableLabel("userInputCity", new PropertyModel(this, "labelUserInputCityText")) {
-        //Methode onSubmit wird überschrieben
 
+        @Override
+        protected FormComponent newEditor(MarkupContainer parent, String componentId, IModel model) {
+
+            final FormComponent form = super.newEditor(parent, componentId,
+                    model);
+            form.add(new LocationAutoCompleteBehavior());
+            return form;
+        }
+
+
+
+        //Methode onSubmit wird überschrieben
         @Override
         protected void onSubmit(AjaxRequestTarget target) {
             if (target != null) {
@@ -60,7 +75,7 @@ public final class LocationPanel extends Panel {
                     //Falls Text Null war setze den text des Labels wieder zurück auf die Region des Benutzers
                     labelUserInputCityText = ((BasePage) this.getPage()).getUserLocation().getCity();
                     labelUserUrbanAreaText = ((HomePage) this.getPage()).getUserLocation().getUrbanArea();
-                    
+
                     //aktualisiere die Label in der HTML
                     target.addComponent(userInputCity);
                     target.addComponent(userUrbanArea);
@@ -85,7 +100,8 @@ public final class LocationPanel extends Panel {
     public void setLabelUserUrbanArea(String labelUserUrbanArea) {
         this.labelUserUrbanAreaText = labelUserUrbanArea;
     }
-    Label userUrbanArea = new Label("userUrbanArea", new PropertyModel(this, "labelUserUrbanAreaText")){
+    Label userUrbanArea = new Label("userUrbanArea", new PropertyModel(this, "labelUserUrbanAreaText")) {
+
         {
             //Wichtig damit ajax funktioniert! So wird die ID des Elements in die HTML übergeben
             setOutputMarkupId(true);
