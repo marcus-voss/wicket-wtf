@@ -81,8 +81,13 @@ public class BasePage extends WebPage {
 
 
         //Set <<system-wide>> Proxy Settings :-(
-        System.getProperties().put("http.proxyHost", ((InetSocketAddress)this.getProxy().address()).getHostName());
-        System.getProperties().put("http.proxyPort", ((InetSocketAddress)this.getProxy().address()).getPort());
+		Proxy proxy = getProxy();
+		if(proxy != null) {
+
+			System.getProperties().put("http.proxyHost", ((InetSocketAddress) proxy.address()).getHostName());
+			System.getProperties().put("http.proxyPort", ((InetSocketAddress) proxy.address()).getPort());
+
+		}
         //Proxy Settings Ende
     }
 
@@ -93,8 +98,8 @@ public class BasePage extends WebPage {
 	public Proxy getProxy() {
 
 		Proxy proxy = null;
-                //HWR Proxy - beim Deployen nächste Zeile auskommentieren
-		proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
+		//HWR Proxy - beim Deployen nächste Zeile auskommentieren
+		//proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
 		return proxy;
 
 	}
