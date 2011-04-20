@@ -12,12 +12,10 @@ import de.hwr.wdint.rss.RSSPanel;
 import de.hwr.wdint.weather.WeatherPanel;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.ArrayList;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.markup.html.resources.StyleSheetReference;
-import org.apache.wicket.util.string.Strings;
 
 /** 
  *
@@ -99,6 +97,8 @@ public class BasePage extends WebPage {
 
 		}
         //Proxy Settings Ende
+
+     
     }
 
 	/**
