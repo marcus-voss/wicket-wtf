@@ -9,7 +9,6 @@ import de.hwr.wdint.HomePage;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxEditableLabel;
-import org.apache.wicket.extensions.ajax.markup.html.autocomplete.AutoCompleteBehavior;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -43,8 +42,6 @@ public final class LocationPanel extends Panel {
             form.add(new LocationAutoCompleteBehavior());
             return form;
         }
-
-
 
         //Methode onSubmit wird überschrieben
         @Override
@@ -123,7 +120,11 @@ public final class LocationPanel extends Panel {
         super.onBeforeRender();
         labelUserInputCityText = ((HomePage) this.getPage()).getUserLocation().getCity();
         labelUserUrbanAreaText = ((HomePage) this.getPage()).getUserLocation().getUrbanArea();
+
+
         add(userInputCity);
         add(userUrbanArea);
+
+
     }
 }

@@ -4,13 +4,21 @@
  */
 package de.hwr.wdint.location;
 
+import de.hwr.wdint.BasePage;
+import de.hwr.wdint.HomePage;
 import java.io.Serializable;
 import java.net.Proxy;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.wicket.RequestCycle;
+import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebRequest;
+import org.apache.wicket.protocol.http.WebRequestCycle;
+import org.apache.wicket.protocol.http.request.WebClientInfo;
+import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -25,7 +33,8 @@ public class Location implements Serializable {
     /*
      *city ist die Stadt des Benutzers
      */
-    
+
+    private static final long serialVersionUID = 1L;
 
     String city;
     /*
@@ -47,7 +56,7 @@ public class Location implements Serializable {
      */
     String longitude;
     /*
-     * yahooAppID ist der Schlüssel der von yahoo für dei Nutzung des Geolocation Services benötigt wird
+     * yahooAppID ist der Schlüssel der von yahoo für die Nutzung des Geolocation Services benötigt wird
      */
     final String yahooAppID = "PCvCMCfV34EK39cA9nSF8xTLKsi_b_iYNcPOvjVVRf20M_OOxfevRC0duEU_7kvwwXBq_EJN3klw844mtFAHiNqFJC9F2Yo-";
 
@@ -105,7 +114,9 @@ public class Location implements Serializable {
                 regionName = r.name();
             }
         }
-        System.out.println("minDistance: " + minDistance + " Region: " + regionName);
+        String msg = "minDistance: " + minDistance + " Region: " + regionName;
+        Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, msg);
+        System.out.println(msg);
         this.urbanArea = regionName;
     }
 
@@ -133,6 +144,7 @@ public class Location implements Serializable {
      * Stellt die IP Adresse des Benutzers fest und versucht aus dieser den Aufenthaltsort zu erkennen.
      */
     public Location() {
+        /*
         //Aktuellen WebRequest bekommen
         WebRequest wr = (WebRequest) RequestCycle.get().getRequest();
         //IP Adresse des Benutzers feststellen
@@ -140,8 +152,26 @@ public class Location implements Serializable {
         
         //Methode aufrufen zur Geolokalisierung des Benutzers mittels IP
         getLocationInfoByIP(originatingIPAddress);
+        */
+        final ServletWebRequest req = (ServletWebRequest)RequestCycle.get().getRequest();
+        //Versuche zunächst IP durch evt. Proxy herauszukriegen
+        String remoteAddr = req.getHttpServletRequest().getHeader("X-FORWARDED-FOR");
+        if (remoteAddr == null){
+            //falls kein Proxy da ist, nehme die Standard Host Adresse
+            remoteAddr = req.getHttpServletRequest().getRemoteAddr();
+        }else{
+            //x-forwarded-for enthält unter Umständen mehrere IP Adressen kommasepariert
+            
+            int lastIndex = remoteAddr.lastIndexOf(",");
+            //wir wollen nur den letzten
+            if (lastIndex != -1){
+                remoteAddr = remoteAddr.substring(lastIndex, remoteAddr.length());
+            }
+        }
 
-
+        
+        System.out.println("IP-Adresse: " + remoteAddr);
+        getLocationInfoByIP(remoteAddr);
     }
     /*
      * Berechnung der Entfernung zwischen zwei Längen- und Breitengraden
@@ -166,6 +196,8 @@ public class Location implements Serializable {
      */
     private void getLocationInfoByUserInput(String userInput) {
         try {
+            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, userInput);
+
             System.out.println(userInput);
 
             //Zeichen umwandeln, die Yahoo nicht verwerten kann
@@ -224,11 +256,13 @@ public class Location implements Serializable {
 
         } catch (Exception e) {
             //Im Fehlerfall alles Null setzen
-            this.setCity("...Fehler");
+            this.setCity("... Fehler");
             this.setLatitude("0");
             this.setLongitude("0");
             this.setUrbanArea();
-            e.printStackTrace();
+            
+            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, e);
+
 
         }
     }
@@ -238,10 +272,14 @@ public class Location implements Serializable {
 
     private void getLocationInfoByIP(String theIP) {
         System.out.println("Originating IP Address = " + theIP);
+        
         //Falls localhost zugreift, muss die IP Adresse auf einen leeren String gestezt werden, da der WebService andernfalls spinnt
         if(theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1") || theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")){
             theIP = "";
-            System.out.println("Changed IP to null String");
+            String msg = "Changed IP to null String";
+            System.out.println(msg);
+            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, msg);
+
         }
 
 
@@ -294,11 +332,13 @@ public class Location implements Serializable {
 
         } catch (Exception e) {
             //Im Fehlerfall alles auf Null
-            this.setCity("... Fehler");
+            this.setCity("... Fehler - IP - Adresse: " + theIP);
             this.setLatitude("0");
             this.setLongitude("0");
             this.setUrbanArea();
-            e.printStackTrace();
+
+            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, e);
+
         }
 
     }
