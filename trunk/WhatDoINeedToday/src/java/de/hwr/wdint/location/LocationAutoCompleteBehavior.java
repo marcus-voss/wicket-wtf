@@ -4,7 +4,6 @@
  */
 package de.hwr.wdint.location;
 
-import de.hwr.wdint.location.Regions;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.wicket.extensions.ajax.markup.html.autocomplete.AutoCompleteBehavior;
 import org.apache.wicket.extensions.ajax.markup.html.autocomplete.StringAutoCompleteRenderer;
-import org.geonames.Style;
 import org.geonames.Toponym;
 import org.geonames.ToponymSearchCriteria;
 import org.geonames.ToponymSearchResult;
@@ -52,7 +50,7 @@ public class LocationAutoCompleteBehavior extends AutoCompleteBehavior {
             for (Toponym toponym : searchResult.getToponyms()) {
                 String cityName = toponym.getName();
                 //Zeige dem Benutzer maximal 5 Einträge an
-                if(subList.size() == 5){
+                if (subList.size() == 5) {
                     break;
                 }
                 //Manchmal werden doppelte Einträge geliefert - die müssen manuell aussortiert werden
