@@ -34,7 +34,8 @@ public final class WeatherPanel extends Panel
     private String conditions;
     private String iconUrl;
 
-    
+    private String sunsetTime;
+    private String sunriseTime;
 
     /**
      * Main
@@ -86,9 +87,6 @@ public final class WeatherPanel extends Panel
             add(title);
 
            iconUrl = weatherInfo.getIcon();
-            //iconUrl = "http://icons-ecast.wxug.com/i/c/h/partlycloudy.gif?" + Math.random();
-           // add(imageIcon);
-            //add(new StaticImage("icon", new Model(iconUrl)));
 
         }
         catch (Exception ex)
@@ -167,6 +165,14 @@ public final class WeatherPanel extends Panel
         }
 
     };
+
+    public String getSunriseTime() {
+        return sunriseTime;
+    }
+
+    public String getSunsetTime() {
+        return sunsetTime;
+    }
 
    
 
