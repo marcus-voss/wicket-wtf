@@ -27,6 +27,8 @@ public class BasePage extends WebPage {
     //Dieses ist als Singleton ausgelegt
 
     private Location userLocation;
+    private String sunsetTime;
+    private String sunriseTime;
 
     public void setUserLocation(String userInput) {
         this.userLocation = new Location(userInput);
@@ -62,6 +64,7 @@ public class BasePage extends WebPage {
 
         super(model);
 
+
         /*
          * Initialisierung der Panels auf der BasePage
          * und aktivieren.
@@ -85,6 +88,9 @@ public class BasePage extends WebPage {
          *
          *
          */
+        sunsetTime = weatherPanel.getSunsetTime();
+        sunriseTime = weatherPanel.getSunriseTime();
+
         add(new StyleSheetReference("stylesheet", BasePage.class, "style.css"));
 
 
