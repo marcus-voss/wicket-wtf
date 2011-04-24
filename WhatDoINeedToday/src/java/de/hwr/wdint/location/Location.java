@@ -56,6 +56,27 @@ public class Location implements Serializable {
      */
     String longitude;
     /*
+     * sunsetTime und sunriseTime speichern die aktuellen Sonnenunter und aufgangszeiten
+     */
+    String sunsetTime;
+    String sunriseTime;
+
+    public String getSunriseTime() {
+        return sunriseTime;
+    }
+
+    public void setSunriseTime(String sunriseTime) {
+        this.sunriseTime = sunriseTime;
+    }
+
+    public String getSunsetTime() {
+        return sunsetTime;
+    }
+
+    public void setSunsetTime(String sunsetTime) {
+        this.sunsetTime = sunsetTime;
+    }
+    /*
      * yahooAppID ist der Schlüssel der von yahoo für die Nutzung des Geolocation Services benötigt wird
      */
     final String yahooAppID = "PCvCMCfV34EK39cA9nSF8xTLKsi_b_iYNcPOvjVVRf20M_OOxfevRC0duEU_7kvwwXBq_EJN3klw844mtFAHiNqFJC9F2Yo-";
