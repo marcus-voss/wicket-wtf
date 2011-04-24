@@ -20,6 +20,7 @@ import org.apache.wicket.model.PropertyModel;
  * @author juliusollesch
  */
 public final class LocationPanel extends Panel {
+    
 
     //Variable für das Datenmodell des Labels des Pannels
     private String labelUserInputCityText = "";

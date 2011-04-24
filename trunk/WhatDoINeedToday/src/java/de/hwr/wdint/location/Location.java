@@ -4,21 +4,17 @@
  */
 package de.hwr.wdint.location;
 
-import de.hwr.wdint.BasePage;
-import de.hwr.wdint.HomePage;
 import java.io.Serializable;
-import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.wicket.RequestCycle;
-import org.apache.wicket.Session;
-import org.apache.wicket.protocol.http.WebRequest;
-import org.apache.wicket.protocol.http.WebRequestCycle;
-import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -35,7 +31,6 @@ public class Location implements Serializable {
      */
 
     private static final long serialVersionUID = 1L;
-
     String city;
     /*
      * @deprecated Wird derzeit nicht benötigt
@@ -81,6 +76,8 @@ public class Location implements Serializable {
      */
     final String yahooAppID = "PCvCMCfV34EK39cA9nSF8xTLKsi_b_iYNcPOvjVVRf20M_OOxfevRC0duEU_7kvwwXBq_EJN3klw844mtFAHiNqFJC9F2Yo-";
 
+    final String googleID = "ABQIAAAAkQnUeWkpWX2ghpH_HBNKThRNpo9uqOK-a7B_JqEqDo20wX8tIRRUoWgo4zGl7z27---7vloAp8XY8g";
+
     public String getLatitude() {
         return latitude;
     }
@@ -121,7 +118,7 @@ public class Location implements Serializable {
         double minDistance = Double.MAX_VALUE;
         String regionName = "";
 
-
+        //Gehe durch die Regionen und bestimme die Nahegelegenste - Annahme: kreisförmige Region
         for (Regions r : Regions.values()) {
             double lat1 = r.getLatitude();
             double lon1 = r.getLongitude();
@@ -136,7 +133,7 @@ public class Location implements Serializable {
             }
         }
         String msg = "minDistance: " + minDistance + " Region: " + regionName;
-        Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, msg);
+
         System.out.println(msg);
         this.urbanArea = regionName;
     }
@@ -155,9 +152,11 @@ public class Location implements Serializable {
      *
      */
     public Location(String userInput) {
-        userInput = userInput.replace(" ", "%20");
-        getLocationInfoByUserInput(userInput);
 
+        //getLocationInfoByUserInputUsingYahoo(userInput);
+
+        //Ergebnisse von Google sind besser...
+        getLocationInfoByUserInputUsingGoogle(userInput);
     }
 
     /*
@@ -167,31 +166,43 @@ public class Location implements Serializable {
     public Location() {
         /*
         //Aktuellen WebRequest bekommen
-        WebRequest wr = (WebRequest) RequestCycle.get().getRequest();
         //IP Adresse des Benutzers feststellen
-        String originatingIPAddress = wr.getHttpServletRequest().getRemoteHost();
-        
-        //Methode aufrufen zur Geolokalisierung des Benutzers mittels IP
-        getLocationInfoByIP(originatingIPAddress);
-        */
-        final ServletWebRequest req = (ServletWebRequest)RequestCycle.get().getRequest();
-        //Versuche zunächst IP durch evt. Proxy herauszukriegen
+         */
+        final ServletWebRequest req = (ServletWebRequest) RequestCycle.get().getRequest();
+
+
+        /*
+         * Versuche zunächst IP durch evt. Proxy herauszukriegen
+         * Funktioniert bei Anfragen über Standard-Internetverbindungen
+         * Bei UMTS Verbindungen sind die IPs vertauscht... Da dies aber nicht
+         * erkennbar ist, fehlt derzeit ein Bugfix.
+         */
         String remoteAddr = req.getHttpServletRequest().getHeader("X-FORWARDED-FOR");
-        if (remoteAddr == null){
+
+        System.out.println("X-Forwarded-For: " + remoteAddr);
+        System.out.println("Remote Address Header: " + req.getHttpServletRequest().getRemoteAddr());
+
+        
+
+        if (remoteAddr == null) {
             //falls kein Proxy da ist, nehme die Standard Host Adresse
             remoteAddr = req.getHttpServletRequest().getRemoteAddr();
-        }else{
+        } else {
             //x-forwarded-for enthält unter Umständen mehrere IP Adressen kommasepariert
-            
+
             int lastIndex = remoteAddr.lastIndexOf(",");
             //wir wollen nur den letzten
-            if (lastIndex != -1){
-                remoteAddr = remoteAddr.substring(lastIndex, remoteAddr.length());
+            if (lastIndex != -1) {
+                remoteAddr = remoteAddr.substring(lastIndex + 1, remoteAddr.length());
+
+                remoteAddr = remoteAddr.replaceAll(" ", "");
             }
         }
 
-        
+
         System.out.println("IP-Adresse: " + remoteAddr);
+
+        //Geolokalisierung mittels IP Adresse
         getLocationInfoByIP(remoteAddr);
     }
     /*
@@ -213,9 +224,76 @@ public class Location implements Serializable {
     }
 
     /*
-     * Methode zur Ermittlung des Aufenthaltsorts nach Benutzereingabe
+     * Methode zur Ermittlung des Aufenthaltsorts nach Benutzereingabe mit Yahoo
      */
-    private void getLocationInfoByUserInput(String userInput) {
+    private void getLocationInfoByUserInputUsingGoogle(String userInput) {
+        try {
+            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, userInput);
+
+
+
+            //Zeichen umwandeln, die Google nicht verwerten kann
+            userInput = userInput.replaceAll("ä", "ae");
+            userInput = userInput.replaceAll("ü", "ue");
+            userInput = userInput.replaceAll("ö", "oe");
+            userInput = userInput.replaceAll("ß", "ss");
+            userInput = userInput.replaceAll(" ", "+");
+            userInput = userInput.toLowerCase();
+
+            System.out.println(userInput);
+            // URL zu Google Geolocation API erstellen
+            URL url = new URL("https://maps.googleapis.com/maps/api/geocode/xml?address=" + userInput + "&sensor=false&key=" + googleID);
+            URLConnection urlConnection = url.openConnection();
+            //Setzen der Request Header ist notwendig, damit Google uns auf Deutsch antwortet
+            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_7; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.205 Safari/534.16");
+            urlConnection.setRequestProperty("Accept-Language", "de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4");
+
+
+
+            System.out.println("Google APi Url: " + url.toString());
+            //SAX Builder verwenden, DocBuilder kommt mit Googles XML Format nicht klar
+            SAXBuilder builder = new SAXBuilder();
+            org.jdom.Document doc = builder.build(urlConnection.getInputStream());
+
+            Element root = doc.getRootElement();
+            System.out.println("Status response: " + root.getChildText("status"));
+            if (root.getChildText("status").equalsIgnoreCase("OK")) {
+                Element result = root.getChild("result");
+                Element address = result.getChild("address_component");
+                Element geometry = result.getChild("geometry");
+                Element location = geometry.getChild("location");
+                System.out.println("City response: " + address.getChildText("long_name"));
+                this.setCity(address.getChildText("long_name"));
+                System.out.println("Latitude response: " + location.getChildText("lat"));
+                this.setLatitude(location.getChildText("lat"));
+                System.out.println("Longitude response: " + location.getChildText("lng"));
+                this.setLongitude(location.getChildText("lng"));
+                //Aufrufen des Setters von urbanArea zur Bestimmung der naheliegensten Region
+                this.setUrbanArea();
+            } else {
+                throw new Exception("Google Maps API Fehler");
+            }
+
+
+
+
+        } catch (Exception e) {
+            //Im Fehlerfall alles Null setzen
+            this.setCity("... Fehler");
+            this.setLatitude("0");
+            this.setLongitude("0");
+            this.setUrbanArea();
+
+            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, e);
+
+
+        }
+    }
+
+    /*
+     * Methode zur Ermittlung des Aufenthaltsorts nach Benutzereingabe mit Yahoo
+     */
+    private void getLocationInfoByUserInputUsingYahoo(String userInput) {
         try {
             Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, userInput);
 
@@ -281,7 +359,7 @@ public class Location implements Serializable {
             this.setLatitude("0");
             this.setLongitude("0");
             this.setUrbanArea();
-            
+
             Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, e);
 
 
@@ -293,9 +371,9 @@ public class Location implements Serializable {
 
     private void getLocationInfoByIP(String theIP) {
         System.out.println("Originating IP Address = " + theIP);
-        
+
         //Falls localhost zugreift, muss die IP Adresse auf einen leeren String gestezt werden, da der WebService andernfalls spinnt
-        if(theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1") || theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")){
+        if (theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1") || theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")) {
             theIP = "";
             String msg = "Changed IP to null String";
             System.out.println(msg);
@@ -314,9 +392,13 @@ public class Location implements Serializable {
             // Document Builder initialisieren und mit Inhalt des XML von GeoPlugin füttern
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setValidating(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
 
-            System.out.println("URL Stream: " + url.openConnection(Proxy.NO_PROXY));
+
+
+
+
 
             Document doc = db.parse(url.openStream());
 
@@ -324,13 +406,7 @@ public class Location implements Serializable {
             doc.getDocumentElement().normalize();
 
 
-            //City Attribut einlesen
-            NodeList cityNodes = doc.getElementsByTagName("geoplugin_city");
-            if (cityNodes.getLength() > 0) {
-                this.setCity(cityNodes.item(0).getTextContent());
-            } else {
-                this.setCity("Not found");
-            }
+
             //Längengrad einlesen
             NodeList latitudeNodes = doc.getElementsByTagName("geoplugin_latitude");
             if (latitudeNodes.getLength() > 0) {
@@ -349,6 +425,21 @@ public class Location implements Serializable {
 
             //Aufrufen des Setters von urbanArea zur Bestimmung der naheliegensten Region
             this.setUrbanArea();
+
+            //City Attribut einlesen
+            NodeList cityNodes = doc.getElementsByTagName("geoplugin_city");
+            if (cityNodes.getLength() > 0) {
+                String geopluginCity = cityNodes.item(0).getTextContent();
+                //Falls keine Stadt geliefert wird (passiert bei UMTS Zugriffen)
+                if (geopluginCity.equalsIgnoreCase("")) {
+                    //setze Stadt gleich der ermittelten Region
+                    this.setCity(this.getUrbanArea());
+                } else {
+                    this.setCity(geopluginCity);
+                }
+            } else {
+                this.setCity("Not found");
+            }
 
 
         } catch (Exception e) {

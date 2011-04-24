@@ -26,7 +26,7 @@ public class LocationAutoCompleteBehavior extends AutoCompleteBehavior {
     protected Iterator getChoices(String input) {
         try {
             List subList = new ArrayList();
-
+            //Auch hier brauchen wir eine ID
             WebService.setUserName("wdint");
 
             //Bekomme eine Liste Städte
@@ -41,9 +41,7 @@ public class LocationAutoCompleteBehavior extends AutoCompleteBehavior {
             searchCriteria.setMaxRows(10);
             //und in Deutschland ist
             searchCriteria.setCountryCode("DE");
-            //und eine Stadt ist
-            searchCriteria.setFeatureCode("PPL");
-
+            
             ToponymSearchResult searchResult = WebService.search(searchCriteria);
 
 
