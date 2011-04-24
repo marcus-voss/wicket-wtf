@@ -87,6 +87,12 @@ public final class WeatherPanel extends Panel
             add(title);
 
            iconUrl = weatherInfo.getIcon();
+           
+           sunriseTime = weatherInfo.getSunset();
+           sunsetTime = weatherInfo.getSunrise();
+
+           ((BasePage)this.getPage()).getUserLocation().setSunsetTime(sunsetTime);
+           ((BasePage)this.getPage()).getUserLocation().setSunriseTime(sunriseTime);
 
         }
         catch (Exception ex)
