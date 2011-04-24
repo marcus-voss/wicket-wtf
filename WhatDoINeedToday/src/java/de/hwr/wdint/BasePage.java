@@ -27,6 +27,7 @@ public class BasePage extends WebPage {
     //Dieses ist als Singleton ausgelegt
 
     private Location userLocation;
+
     private String sunsetTime;
     private String sunriseTime;
 
@@ -87,9 +88,11 @@ public class BasePage extends WebPage {
          ToDo: Stylesheet Tageszeit-abhängig ändern oder modifizieren
          *
          *
+         *
+         * 
          */
-        sunsetTime = weatherPanel.getSunsetTime();
-        sunriseTime = weatherPanel.getSunriseTime();
+      // sunsetTime = this.userLocation.getSunsetTime();
+      // sunriseTime = this.userLocation.getSunriseTime();
 
         add(new StyleSheetReference("stylesheet", BasePage.class, "style.css"));
 
