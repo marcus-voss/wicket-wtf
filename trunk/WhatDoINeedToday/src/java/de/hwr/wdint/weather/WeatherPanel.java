@@ -88,8 +88,8 @@ public final class WeatherPanel extends Panel
 
            iconUrl = weatherInfo.getIcon();
            
-           sunriseTime = weatherInfo.getSunset();
-           sunsetTime = weatherInfo.getSunrise();
+           sunriseTime = weatherInfo.getSunrise();
+           sunsetTime = weatherInfo.getSunset();
 
            ((BasePage)this.getPage()).getUserLocation().setSunsetTime(sunsetTime);
            ((BasePage)this.getPage()).getUserLocation().setSunriseTime(sunriseTime);
