@@ -9,6 +9,7 @@ import de.hwr.wdint.facebook.FacebookPanel;
 import de.hwr.wdint.location.Location;
 import de.hwr.wdint.location.LocationPanel;
 import de.hwr.wdint.rss.RSSPanel;
+import de.hwr.wdint.style.Style;
 import de.hwr.wdint.weather.WeatherPanel;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -84,28 +85,26 @@ public class BasePage extends WebPage {
         add(weatherPanel);
         add(facebookPanel);
 
-        /*
-         ToDo: Stylesheet Tageszeit-abhängig ändern oder modifizieren
-         *
-         *
-         *
-         * 
-         */
-      // sunsetTime = this.userLocation.getSunsetTime();
-      // sunriseTime = this.userLocation.getSunriseTime();
+        // sunsetTime = this.userLocation.getSunsetTime();
+        // sunriseTime = this.userLocation.getSunriseTime();
+         Style style = new Style("style", weatherPanel);
 
-        add(new StyleSheetReference("stylesheet", BasePage.class, "style.css"));
+        add(style);
+
+        //Deprecated - läuft jetzt über Style.class
+        //add(new StyleSheetReference("stylesheet", BasePage.class, "style.css"));
 
 
         //Set <<system-wide>> Proxy Settings :-(
-		Proxy proxy = getProxy();
+        /*	Proxy proxy = getProxy();
 		if(proxy != null) {
 
 			System.getProperties().put("http.proxyHost", ((InetSocketAddress) proxy.address()).getHostName());
 			System.getProperties().put("http.proxyPort", ((InetSocketAddress) proxy.address()).getPort());
 
 		}
-        //Proxy Settings Ende
+                */
+         //Proxy Settings Ende
 
      
     }
