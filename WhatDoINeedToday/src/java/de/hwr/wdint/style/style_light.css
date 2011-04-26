@@ -206,14 +206,14 @@ col#second {
 
 .rssPanelTV{
 
-    background-image: url(resources/Plasma-Telly.png);
+    background-image: url(Plasma-Telly.png);
     background-repeat: no-repeat;
     background-position: right top;
 }
 
 .rssPanelParty{
 
-    background-image: url(resources/pink-cocktail.png);
+    background-image: url(pink-cocktail.png);
     background-repeat: no-repeat;
     background-position: right top;
 }

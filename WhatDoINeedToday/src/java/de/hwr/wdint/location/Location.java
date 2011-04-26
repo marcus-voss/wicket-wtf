@@ -50,9 +50,11 @@ public class Location implements Serializable {
      * longitude speichert den Breitengrad, String da alle WebServices ebenfalls Strings benutzen
      */
     String longitude;
+
+
     /*
-     * sunsetTime und sunriseTime speichern die aktuellen Sonnenunter und aufgangszeiten
-     */
+     * Deprecated: sunsetTime und sunriseTime speichern die aktuellen Sonnenunter und aufgangszeiten
+     
     String sunsetTime;
     String sunriseTime;
 
@@ -71,6 +73,9 @@ public class Location implements Serializable {
     public void setSunsetTime(String sunsetTime) {
         this.sunsetTime = sunsetTime;
     }
+     * 
+     */
+
     /*
      * yahooAppID ist der Schlüssel der von yahoo für die Nutzung des Geolocation Services benötigt wird
      */
@@ -253,14 +258,16 @@ public class Location implements Serializable {
 
 
 
-            System.out.println("Google APi Url: " + url.toString());
+            System.out.println("Google API URL: " + url.toString());
             //SAX Builder verwenden, DocBuilder kommt mit Googles XML Format nicht klar
             SAXBuilder builder = new SAXBuilder();
             org.jdom.Document doc = builder.build(urlConnection.getInputStream());
 
             Element root = doc.getRootElement();
             System.out.println("Status response: " + root.getChildText("status"));
+            //Falls wir eine "Gute" Antwort von Google erhalten
             if (root.getChildText("status").equalsIgnoreCase("OK")) {
+                //Hole die Attributwerte aus dem XML
                 Element result = root.getChild("result");
                 Element address = result.getChild("address_component");
                 Element geometry = result.getChild("geometry");
@@ -276,7 +283,6 @@ public class Location implements Serializable {
             } else {
                 throw new Exception("Google Maps API Fehler");
             }
-
 
 
 
@@ -298,9 +304,9 @@ public class Location implements Serializable {
      */
     private void getLocationInfoByUserInputUsingYahoo(String userInput) {
         try {
-            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, userInput);
+            Logger.getLogger(Location.class.getName()).log(Level.INFO, null, userInput);
 
-            System.out.println(userInput);
+            
 
             //Zeichen umwandeln, die Yahoo nicht verwerten kann
             userInput = userInput.replaceAll("ä", "ae");
@@ -375,7 +381,7 @@ public class Location implements Serializable {
     private void getLocationInfoByIP(String theIP) {
         System.out.println("Originating IP Address = " + theIP);
 
-        //Falls localhost zugreift, muss die IP Adresse auf einen leeren String gestezt werden, da der WebService andernfalls spinnt
+        //Falls localhost zugreift, muss die IP Adresse auf einen leeren String gestezt werden, da der WebService von geoplugin andernfalls spinnt
         if (theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1") || theIP.equalsIgnoreCase("0:0:0:0:0:0:0:1%0") || theIP.equalsIgnoreCase("127.0.0.1")) {
             theIP = "";
             String msg = "Changed IP to null String";
