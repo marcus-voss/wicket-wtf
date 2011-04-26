@@ -16,12 +16,11 @@ import java.net.Proxy;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.markup.html.resources.StyleSheetReference;
 
 /** 
  *
  * @author juliusollesch
- * @version 
+ * @version 1.0
  */
 public class BasePage extends WebPage {
     //Ergänzung der BasePage Klasse um ein Location Objekt
@@ -29,12 +28,9 @@ public class BasePage extends WebPage {
 
     private Location userLocation;
 
-    private String sunsetTime;
-    private String sunriseTime;
-
     public void setUserLocation(String userInput) {
         this.userLocation = new Location(userInput);
-        
+
     }
 
     public Location getUserLocation() {
@@ -76,7 +72,7 @@ public class BasePage extends WebPage {
         rssPanel = new RSSPanel("rssPanel");
         weatherPanel = new WeatherPanel("weatherPanel");
         facebookPanel = new FacebookPanel("facebookPanel");
-        
+
 
 
 
@@ -87,7 +83,7 @@ public class BasePage extends WebPage {
 
         // sunsetTime = this.userLocation.getSunsetTime();
         // sunriseTime = this.userLocation.getSunriseTime();
-         Style style = new Style("style", weatherPanel);
+        Style style = new Style("style", weatherPanel);
 
         add(style);
 
@@ -96,66 +92,66 @@ public class BasePage extends WebPage {
 
 
         //Set <<system-wide>> Proxy Settings :-(
-        /*	Proxy proxy = getProxy();
-		if(proxy != null) {
+        Proxy proxy = getProxy();
+        if (proxy != null) {
 
-			System.getProperties().put("http.proxyHost", ((InetSocketAddress) proxy.address()).getHostName());
-			System.getProperties().put("http.proxyPort", ((InetSocketAddress) proxy.address()).getPort());
+            System.getProperties().put("http.proxyHost", ((InetSocketAddress) proxy.address()).getHostName());
+            System.getProperties().put("http.proxyPort", ((InetSocketAddress) proxy.address()).getPort());
 
-		}
-                */
-         //Proxy Settings Ende
+        }
 
-     
+        //Proxy Settings Ende
+
+
     }
 
-	/**
-	 * gets the proxy settings for HWR
-	 * @return
-	 */
-	public Proxy getProxy() {
+    /**
+     * gets the proxy settings for HWR
+     * @return
+     */
+    public Proxy getProxy() {
 
-		Proxy proxy = null;
-		//HWR Proxy - beim Deployen nächste Zeile auskommentieren
-		//proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
-		return proxy;
+        Proxy proxy = null;
+        //HWR Proxy - beim Deployen nächste Zeile auskommentieren
+        //proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("194.94.23.231", 80));
+        return proxy;
 
-	}
+    }
 
-
-
-        /*
-         * Aktualisiert die BasePage mit AJAX
-         */
-    public void update(AjaxRequestTarget target){
+    /*
+     * Aktualisiert die BasePage mit AJAX
+     */
+    public void update(AjaxRequestTarget target) {
         //Falls AJAX Request
-        if (target!= null){
+        if (target != null) {
 
-           /*
-            * Weather Panel überschreibt onBeforeRender
-            * und initialisiert die Werte sofort neu wenn es
-            * nochmal hinzugefügt wird
-            */
-           weatherPanel.setLabelText("Update");
-           target.addComponent(weatherPanel);
+            /*
+             * Weather Panel überschreibt onBeforeRender
+             * und initialisiert die Werte sofort neu wenn es
+             * nochmal hinzugefügt wird
+             */
+            weatherPanel.setLabelText("Update");
+            target.addComponent(weatherPanel);
 
-           /*
-            * RSSPanel muss neu initialisiert werden
-            * Benutzer soll wieder die Auswahl haben ob Weggehen oder Zuhause bleiben
-            * Da wir im RSS Panel die Auswahl nicht Zwischenspeichern sondern über Links
-            * dynamisch Inhalte hereinladen ist dies die beste Lösung.
-            *
-            * Unschön ist, das Wicket nicht erkennt wenn Komponenten mit replaceWith ausgetauscht werden
-            * Dies ist ähnlich dem Verhalten, dass eine Liste erst geleert werden muss
-            * damit das Wicket Datenmodell die Änderung mitbekommt
-            */
-           RSSPanel tempRSS = new RSSPanel("rssPanel");
-           rssPanel.replaceWith(tempRSS);
-           rssPanel = tempRSS;
-           target.addComponent(rssPanel);
+            /*
+             * RSSPanel muss neu initialisiert werden
+             * Benutzer soll wieder die Auswahl haben ob Weggehen oder Zuhause bleiben
+             * Da wir im RSS Panel die Auswahl nicht Zwischenspeichern sondern über Links
+             * dynamisch Inhalte hereinladen ist dies die beste Lösung.
+             *
+             * Unschön ist, das Wicket nicht erkennt wenn Komponenten mit replaceWith ausgetauscht werden
+             * Dies ist ähnlich dem Verhalten, dass eine Liste erst geleert werden muss
+             * damit das Wicket Datenmodell die Änderung mitbekommt
+             */
+            RSSPanel tempRSS = new RSSPanel("rssPanel");
+            rssPanel.replaceWith(tempRSS);
+            rssPanel = tempRSS;
+            target.addComponent(rssPanel);
+
+            
 
         }//Falls normaler Request
-        else{
+        else {
             //Seite neuladen
             this.setResponsePage(this.getPage());
         }

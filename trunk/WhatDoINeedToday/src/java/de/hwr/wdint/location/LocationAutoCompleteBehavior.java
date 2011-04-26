@@ -19,6 +19,7 @@ import org.geonames.WebService;
 /**
  *
  * @author juliusollesch
+ * Wird bei Eingaben aufgerufen um für diese Städtenamen vorzuschlagen
  */
 public class LocationAutoCompleteBehavior extends AutoCompleteBehavior {
 
