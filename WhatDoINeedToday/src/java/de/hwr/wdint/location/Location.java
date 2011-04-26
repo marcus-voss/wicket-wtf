@@ -285,7 +285,6 @@ public class Location implements Serializable {
             }
 
 
-
         } catch (Exception e) {
             //Im Fehlerfall alles Null setzen
             this.setCity("... Fehler");
@@ -294,7 +293,6 @@ public class Location implements Serializable {
             this.setUrbanArea();
 
             Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, e);
-
 
         }
     }
