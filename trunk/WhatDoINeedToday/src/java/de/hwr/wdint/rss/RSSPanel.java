@@ -160,7 +160,7 @@ public final class RSSPanel extends Panel {
                 labelTitleText = "Fernsehprogramm für heute Abend";
                 target.addComponent(labelTitle);
                 try {
-                    //Data View aktualisieren, zunächst muss list geleert werden, damit AJAX funktioniet
+                    //dataView aktualisieren, zunächst muss list geleert werden, damit AJAX funktioniet
                     list.clear();
                     list.addAll(readRSS(makeTVURL())); //aktualisert list mit den Einträgen des Fernsehprogramms
                     System.out.println("Liste mit: " + list.size());
