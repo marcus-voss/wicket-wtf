@@ -76,6 +76,9 @@ public class Location implements Serializable {
      */
     final String yahooAppID = "PCvCMCfV34EK39cA9nSF8xTLKsi_b_iYNcPOvjVVRf20M_OOxfevRC0duEU_7kvwwXBq_EJN3klw844mtFAHiNqFJC9F2Yo-";
 
+    /*
+     * googleID ist der Schlüssel der von Google für die Nutzung des Geolocation Services benötigt wird
+     */
     final String googleID = "ABQIAAAAkQnUeWkpWX2ghpH_HBNKThRNpo9uqOK-a7B_JqEqDo20wX8tIRRUoWgo4zGl7z27---7vloAp8XY8g";
 
     public String getLatitude() {
@@ -152,7 +155,7 @@ public class Location implements Serializable {
      *
      */
     public Location(String userInput) {
-
+        //Yahoo war mal erste Wahl
         //getLocationInfoByUserInputUsingYahoo(userInput);
 
         //Ergebnisse von Google sind besser...
@@ -182,7 +185,7 @@ public class Location implements Serializable {
         System.out.println("X-Forwarded-For: " + remoteAddr);
         System.out.println("Remote Address Header: " + req.getHttpServletRequest().getRemoteAddr());
 
-        
+
 
         if (remoteAddr == null) {
             //falls kein Proxy da ist, nehme die Standard Host Adresse
@@ -228,7 +231,7 @@ public class Location implements Serializable {
      */
     private void getLocationInfoByUserInputUsingGoogle(String userInput) {
         try {
-            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, userInput);
+            Logger.getLogger(Location.class.getName()).log(Level.INFO, null, userInput);
 
 
 
@@ -377,7 +380,7 @@ public class Location implements Serializable {
             theIP = "";
             String msg = "Changed IP to null String";
             System.out.println(msg);
-            Logger.getLogger(Location.class.getName()).log(Level.SEVERE, null, msg);
+            Logger.getLogger(Location.class.getName()).log(Level.INFO, null, msg);
 
         }
 
@@ -394,10 +397,6 @@ public class Location implements Serializable {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setValidating(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
-
-
-
-
 
 
             Document doc = db.parse(url.openStream());
