@@ -7,6 +7,7 @@ package de.hwr.wdint.style;
 
 import de.hwr.wdint.weather.WeatherPanel;
 import java.sql.Time;
+import java.util.Calendar;
 import java.util.Date;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -34,7 +35,7 @@ public class Style extends Panel{
         
         setOutputMarkupId(true);
 
-        //add(title);
+        //Test: add(title);
 
     }
     /*
@@ -49,6 +50,7 @@ public class Style extends Panel{
         }
 
     };
+
     Label content = new Label("labelContent", new PropertyModel(this,"labelContentText"))
     {
         {
@@ -64,24 +66,28 @@ public class Style extends Panel{
         {
             sunriseTime = weatherPanel.getSunriseTime();
             sunsetTime = weatherPanel.getSunsetTime();
-            //labelContentText = sunriseTime;
 
-            Time now = new Time(new Date().getTime());
+            //now -> derzeitige Uhrzeit und Datum
+            Calendar now = Calendar.getInstance();
 
-            Time todayMidnight = new Time(now.getTime() - Time.valueOf(now.toString()).getTime());
+            //today -> derzeitiger Tag, aber 0 Uhr
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
 
             //korrigiere Unterschied Sommer- / Winterzeit
-/*            if(! (todayMidnight.toString().equalsIgnoreCase("00:00:00")) )
-                todayMidnight.setTime(todayMidnight.getTime() - Time.valueOf("01:00:00").getTime());
-
- */
+            if(today.get(Calendar.DST_OFFSET) != 0) {
+                today.setTimeInMillis(today.getTimeInMillis() + today.get(Calendar.DST_OFFSET));
+            }
 
             //Wandle die Zeiten in Millisekunden um
-            Time sunrise = new Time(Time.valueOf(sunriseTime+":00").getTime() + todayMidnight.getTime());
-            Time sunset = new Time(Time.valueOf(sunsetTime+":00").getTime() + todayMidnight.getTime());
+
+            Time sunrise = new Time(Time.valueOf(sunriseTime+":00").getTime() + today.getTimeInMillis());
+            Time sunset = new Time(Time.valueOf(sunsetTime+":00").getTime() + today.getTimeInMillis());
 
             //Vergleiche jetzigen Zeitpunkt, ob er zwischen sunrise und sunset liegt
-            if(sunrise.before(now) && sunset.after(now))
+            if(sunrise.before(now.getTime()) && sunset.after(now.getTime()))
                 add(new StyleSheetReference("stylesheet", Style.class, "style_light.css"));
             else
                 add(new StyleSheetReference("stylesheet", Style.class, "style.css"));
